@@ -1,12 +1,16 @@
 import React from 'react';
-import { Search, ShoppingCart, Heart, User } from 'lucide-react';
+import { Search, ShoppingCart, Heart, User, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const Header = () => {
+  const { isAuthenticated, username, logout } = useAuth();
+
   return (
     <header className="w-full bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <a href="/" className="text-2xl font-bold">Ubu the Bear</a>
+          <Link to="/" className="text-2xl font-bold">Ubu the Bear</Link>
           
           <div className="flex items-center space-x-4">
             <div className="relative">
@@ -19,15 +23,28 @@ export const Header = () => {
             </div>
             
             <nav className="flex items-center space-x-6">
-              <a href="/cart" className="flex items-center text-gray-700 hover:text-blue-600">
+              <Link to="/cart" className="flex items-center text-gray-700 hover:text-blue-600">
                 <ShoppingCart className="w-6 h-6" />
-              </a>
-              <a href="/wishlist" className="flex items-center text-gray-700 hover:text-blue-600">
+              </Link>
+              <Link to="/wishlist" className="flex items-center text-gray-700 hover:text-blue-600">
                 <Heart className="w-6 h-6" />
-              </a>
-              <a href="/login" className="flex items-center text-gray-700 hover:text-blue-600">
-                <User className="w-6 h-6" />
-              </a>
+              </Link>
+              
+              {isAuthenticated ? (
+                <div className="flex items-center space-x-4">
+                  <span className="text-gray-700">{username}</span>
+                  <button
+                    onClick={logout}
+                    className="flex items-center text-gray-700 hover:text-blue-600"
+                  >
+                    <LogOut className="w-6 h-6" />
+                  </button>
+                </div>
+              ) : (
+                <Link to="/login" className="flex items-center text-gray-700 hover:text-blue-600">
+                  <User className="w-6 h-6" />
+                </Link>
+              )}
             </nav>
           </div>
         </div>
