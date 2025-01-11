@@ -5,6 +5,8 @@ import { Footer } from './components/layout/Footer';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import ProductPage from './pages/ProductPage';
+import ProductDetailPage from './pages/ProductDetailPage';
 
 const App = () => {
   return (
@@ -17,7 +19,8 @@ const App = () => {
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
-              <Route path="/products/:id" element={<div>Product Detail Page</div>} />
+              <Route path="/products/*" element={<ProductPage />} />
+              <Route path="/products/:id" element={<ProductDetailPage />} />
               <Route path="/cart" element={<div>Cart Page</div>} />
               <Route path="/wishlist" element={<div>Wishlist Page</div>} />
               <Route path="/mypage" element={<div>My Page</div>} />
