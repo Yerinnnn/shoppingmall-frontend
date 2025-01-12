@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
-
-interface Product {
-  productId: number;
-  name: string;
-  price: number;
-  description: string;
-  stockQuantity: number;
-  categoryName: string;
-}
+import { Product } from '../../types/product';
 
 interface ProductListProps {
   categoryId: number | null;
@@ -41,7 +33,6 @@ const ProductList: React.FC<ProductListProps> = ({
           url = `/api/products/search?keyword=${encodeURIComponent(searchQuery)}`;
         }
 
-        console.log('Fetching products from:', url); // API 호출 URL 확인
         const response = await fetch(url);
         
         if (!response.ok) {

@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
-interface Category {
-  categoryId: number;
-  name: string;
-  description: string;
-  productCount: number;
-}
+import { Category } from '../../types/product';
 
 interface CategoryListProps {
   onCategorySelect: (categoryId: number | null) => void;
@@ -28,7 +22,6 @@ const CategoryList: React.FC<CategoryListProps> = ({
           throw new Error('Failed to fetch categories');
         }
         const data = await response.json();
-        console.log('Fetched categories:', data); // API 응답 확인
         setCategories(data);
       } catch (err) {
         console.error('Error fetching categories:', err); // 에러 로깅

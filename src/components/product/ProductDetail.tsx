@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { Heart, ShoppingCart, Truck } from 'lucide-react';
+import { useCart } from '../../hooks/useCart';
+import { Product } from '../../types/product';
 
 interface ProductDetail {
   productDetailId: number;
@@ -14,15 +17,6 @@ interface ProductDetail {
   viewCount: number;
 }
 
-interface Product {
-  productId: number;
-  name: string;
-  price: number;
-  description: string;
-  stockQuantity: number;
-  categoryName: string;
-}
-
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
@@ -32,6 +26,10 @@ const ProductDetail = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string>('');
+  const [addingToCart, setAddingToCart] = useState(false);
+
+  const { mutations: { addToCart } } = useCart();
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,9 +65,26 @@ const ProductDetail = () => {
     setQuantity(parseInt(e.target.value));
   };
 
-  const addToCart = async () => {
-    // TODO: 장바구니 추가 API 연동
-    console.log('Added to cart:', { productId: id, quantity });
+  const handleAddToCart = async () => {
+    if (!product || addingToCart) return;
+    
+    setAddingToCart(true);
+    try {
+      await addToCart({
+        productId: product.productId,
+        quantity: quantity
+      });
+      toast.success('장바구니에 추가되었습니다');
+    } catch (error) {
+      if (error === '로그인이 필요합니다') {
+        toast.error('로그인이 필요한 서비스입니다');
+      } else {
+        toast.error('장바구니 추가에 실패했습니다');
+      }
+      console.error('Failed to add to cart:', error);
+    } finally {
+      setAddingToCart(false);
+    }
   };
 
   const addToWishlist = async () => {
@@ -145,7 +160,7 @@ const ProductDetail = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* 상품 이미지 */}
+        {/* 상품 이미지 섹션은 동일하게 유지 */}
         <div>
           <img
             src={selectedImage || '/api/placeholder/600/600'}
@@ -167,7 +182,7 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* 상품 정보 */}
+        {/* 상품 정보 섹션 */}
         <div className="space-y-6">
           <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
           <p className="text-2xl font-semibold text-gray-900">
@@ -182,8 +197,9 @@ const ProductDetail = () => {
                 value={quantity}
                 onChange={handleQuantityChange}
                 className="border rounded-md py-2 px-4"
+                disabled={product.stockQuantity === 0}
               >
-                {[...Array(10)].map((_, i) => (
+                {[...Array(Math.min(10, product.stockQuantity))].map((_, i) => (
                   <option key={i + 1} value={i + 1}>
                     {i + 1}
                   </option>
@@ -193,11 +209,24 @@ const ProductDetail = () => {
 
             <div className="flex space-x-4">
               <button
-                onClick={addToCart}
-                className="flex-1 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 flex items-center justify-center space-x-2"
+                onClick={handleAddToCart}
+                disabled={addingToCart || product.stockQuantity === 0}
+                className={`flex-1 px-6 py-3 rounded-lg flex items-center justify-center space-x-2 ${
+                  product.stockQuantity === 0
+                    ? 'bg-gray-300 cursor-not-allowed'
+                    : addingToCart
+                    ? 'bg-indigo-400 cursor-not-allowed'
+                    : 'bg-indigo-600 hover:bg-indigo-700'
+                } text-white transition-colors`}
               >
                 <ShoppingCart className="w-5 h-5" />
-                <span>장바구니 담기</span>
+                <span>
+                  {product.stockQuantity === 0
+                    ? '품절'
+                    : addingToCart
+                    ? '담는 중...'
+                    : '장바구니 담기'}
+                </span>
               </button>
               <button
                 onClick={addToWishlist}
@@ -206,9 +235,20 @@ const ProductDetail = () => {
                 <Heart className="w-5 h-5" />
               </button>
             </div>
+
+            {/* 재고 상태 표시 */}
+            <div className="text-sm">
+              {product.stockQuantity > 0 ? (
+                <span className="text-green-600">
+                  재고 {product.stockQuantity}개 남음
+                </span>
+              ) : (
+                <span className="text-red-600">품절</span>
+              )}
+            </div>
           </div>
 
-          {/* 상세 정보 탭 */}
+          {/* 상세 정보 탭 부분은 동일하게 유지 */}
           <div className="mt-8">
             <div className="flex border-b">
               {tabs.map((tab, index) => (

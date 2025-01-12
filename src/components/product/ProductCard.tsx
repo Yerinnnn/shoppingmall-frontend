@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart } from 'lucide-react';
+import { useCart } from '../../hooks/useCart';
+import { toast } from 'react-hot-toast';
 
 export interface ProductCardProps {
   productId: number;
@@ -21,14 +23,25 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { mutations: { addToCart } } = useCart();
 
-  const addToCart = async (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault(); // Link 이벤트 방지
+    if (stockQuantity === 0) return;
+    
     setLoading(true);
     try {
-      // TODO: 장바구니 API 연동
-      console.log('Added to cart:', productId);
+      await addToCart({
+        productId,
+        quantity: 1
+      });
+      toast.success('장바구니에 추가되었습니다');
     } catch (error) {
+      if (error === '로그인이 필요합니다') {
+        toast.error('로그인이 필요한 서비스입니다');
+      } else {
+        toast.error('장바구니 추가에 실패했습니다');
+      }
       console.error('Failed to add to cart:', error);
     } finally {
       setLoading(false);
@@ -78,11 +91,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
             {price.toLocaleString()}원
           </span>
           <button
-            onClick={addToCart}
+            onClick={handleAddToCart}
             disabled={loading || stockQuantity === 0}
             className={`p-2 rounded-lg ${
               stockQuantity === 0
                 ? 'bg-gray-200 cursor-not-allowed'
+                : loading
+                ? 'bg-indigo-400 cursor-not-allowed'
                 : 'bg-indigo-600 hover:bg-indigo-700'
             } text-white transition-colors`}
           >
