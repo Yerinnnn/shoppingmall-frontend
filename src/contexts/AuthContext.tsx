@@ -1,4 +1,3 @@
-// contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // 인증 관련 상태와 함수들의 타입 정의

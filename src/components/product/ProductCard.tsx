@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { useCart } from '../../hooks/useCart';
+import { useWishlist } from '../../hooks/useWishlist';
 import { toast } from 'react-hot-toast';
 
 export interface ProductCardProps {
@@ -23,7 +24,26 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
   const { mutations: { addToCart } } = useCart();
+  const { mutations: { addToWishlist, removeFromWishlistByProductId, checkInWishlist } } = useWishlist();
+
+  // 상품의 위시리스트 포함 여부 확인
+  useEffect(() => {
+    const checkWishlistStatus = async () => {
+      try {
+        const isInWishlist = await checkInWishlist(productId);
+        setIsLiked(isInWishlist);
+      } catch (error) {
+        // 로그인하지 않은 상태에서는 조용히 실패
+        if (error !== '로그인이 필요합니다') {
+          console.error('Failed to check wishlist status:', error);
+        }
+      }
+    };
+    
+    checkWishlistStatus();
+  }, [productId, checkInWishlist]);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault(); // Link 이벤트 방지
@@ -50,9 +70,30 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   const toggleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault(); // Link 이벤트 방지
-    setIsLiked(!isLiked);
-    // TODO: 위시리스트 API 연동
-    console.log('Toggled wishlist:', productId);
+    
+    if (wishlistLoading) return;
+    setWishlistLoading(true);
+    
+    try {
+      if (isLiked) {
+        await removeFromWishlistByProductId(productId);
+        setIsLiked(false);
+        toast.success('위시리스트에서 삭제되었습니다');
+      } else {
+        await addToWishlist(productId);
+        setIsLiked(true);
+        toast.success('위시리스트에 추가되었습니다');
+      }
+    } catch (error) {
+      if (error === '로그인이 필요합니다') {
+        toast.error('로그인이 필요한 서비스입니다');
+      } else {
+        toast.error('위시리스트 처리 중 오류가 발생했습니다');
+      }
+      console.error('Failed to toggle wishlist:', error);
+    } finally {
+      setWishlistLoading(false);
+    }
   };
 
   return (
@@ -74,11 +115,17 @@ const ProductCard: React.FC<ProductCardProps> = ({
         )}
         <button
           onClick={toggleWishlist}
+          disabled={wishlistLoading}
           className={`absolute top-2 right-2 p-2 rounded-full ${
             isLiked ? 'bg-red-500 text-white' : 'bg-white text-gray-500'
-          } hover:scale-110 transition-transform`}
+          } hover:scale-110 transition-transform ${
+            wishlistLoading ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
         >
-          <Heart className="w-5 h-5" fill={isLiked ? 'currentColor' : 'none'} />
+          <Heart 
+            className={`w-5 h-5 ${wishlistLoading ? 'animate-pulse' : ''}`} 
+            fill={isLiked ? 'currentColor' : 'none'} 
+          />
         </button>
       </div>
 

@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { Heart, ShoppingCart, Truck } from 'lucide-react';
 import { useCart } from '../../hooks/useCart';
+import { useWishlist } from '../../hooks/useWishlist';
 import { Product } from '../../types/product';
 
 interface ProductDetail {
@@ -27,9 +28,30 @@ const ProductDetail = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [addingToCart, setAddingToCart] = useState(false);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   const { mutations: { addToCart } } = useCart();
+  const { mutations: { addToWishlist, removeFromWishlistByProductId, checkInWishlist } } = useWishlist();
 
+  // 위시리스트 상태 확인
+  const checkWishlistStatus = useCallback(async () => {
+    if (!id) return;
+    
+    try {
+      const status = await checkInWishlist(parseInt(id));
+      setIsInWishlist(status);
+    } catch (error) {
+      // 로그인하지 않은 상태에서는 조용히 실패
+      if (error !== '로그인이 필요합니다') {
+        console.error('Failed to check wishlist status:', error);
+      }
+    }
+  }, [id, checkInWishlist]);
+
+  useEffect(() => {
+    checkWishlistStatus();
+  }, [checkWishlistStatus]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,9 +109,30 @@ const ProductDetail = () => {
     }
   };
 
-  const addToWishlist = async () => {
-    // TODO: 위시리스트 추가 API 연동
-    console.log('Added to wishlist:', id);
+  const toggleWishlist = async () => {
+    if (wishlistLoading || !id) return;
+    
+    setWishlistLoading(true);
+    try {
+      if (isInWishlist) {
+        await removeFromWishlistByProductId(parseInt(id));
+        setIsInWishlist(false);
+        toast.success('위시리스트에서 삭제되었습니다');
+      } else {
+        await addToWishlist(parseInt(id));
+        setIsInWishlist(true);
+        toast.success('위시리스트에 추가되었습니다');
+      }
+    } catch (error) {
+      if (error === '로그인이 필요합니다') {
+        toast.error('로그인이 필요한 서비스입니다');
+      } else {
+        toast.error('위시리스트 처리 중 오류가 발생했습니다');
+      }
+      console.error('Failed to toggle wishlist:', error);
+    } finally {
+      setWishlistLoading(false);
+    }
   };
 
   const tabs = [
@@ -160,7 +203,7 @@ const ProductDetail = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* 상품 이미지 섹션은 동일하게 유지 */}
+        {/* 상품 이미지 섹션 */}
         <div>
           <img
             src={selectedImage || '/api/placeholder/600/600'}
@@ -229,10 +272,18 @@ const ProductDetail = () => {
                 </span>
               </button>
               <button
-                onClick={addToWishlist}
-                className="px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50"
+                onClick={toggleWishlist}
+                disabled={wishlistLoading}
+                className={`px-6 py-3 rounded-lg transition-colors ${
+                  isInWishlist 
+                    ? 'bg-red-500 text-white border-red-500 hover:bg-red-600' 
+                    : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
               >
-                <Heart className="w-5 h-5" />
+                <Heart 
+                  className={`w-5 h-5 ${wishlistLoading ? 'animate-pulse' : ''}`}
+                  fill={isInWishlist ? 'currentColor' : 'none'} 
+                />
               </button>
             </div>
 
@@ -248,7 +299,7 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* 상세 정보 탭 부분은 동일하게 유지 */}
+          {/* 상세 정보 탭 */}
           <div className="mt-8">
             <div className="flex border-b">
               {tabs.map((tab, index) => (
