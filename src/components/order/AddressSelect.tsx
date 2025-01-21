@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
+import { Address } from '../../types/address';
 
 declare global {
   interface Window {
     daum: any;
   }
-}
-
-interface Address {
-  addressId: number;
-  postalCode: string;
-  roadAddress: string;
-  detailAddress: string;
-  fullAddress: string;
 }
 
 interface AddressSelectProps {

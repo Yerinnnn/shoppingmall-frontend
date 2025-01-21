@@ -1,19 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
-
-interface AddressForm {
-  address: string;
-  city: string;
-  postalCode: string;
-}
-
-interface PaymentMethodForm {
-  paymentType: string;
-  cardNumber: string;
-  expiryDate: string;
-  isDefault: boolean;
-}
+import { AddressForm } from '../../types/address';
 
 interface SignupFormData {
   username: string;
@@ -22,6 +10,13 @@ interface SignupFormData {
   contact: string;
   address: AddressForm;
   paymentMethod: PaymentMethodForm;
+}
+
+interface PaymentMethodForm {
+  paymentType: string;
+  cardNumber: string;
+  expiryDate: string;
+  isDefault: boolean;
 }
 
 interface ValidationErrors {
@@ -49,9 +44,9 @@ const SignupForm = () => {
     name: '',
     contact: '',
     address: {
-      address: '',
-      city: '',
-      postalCode: ''
+      postalCode: '',
+      roadAddress: '',
+      detailAddress: ''
     },
     paymentMethod: {
       paymentType: 'CREDIT_CARD',
@@ -64,6 +59,17 @@ const SignupForm = () => {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    script.async = true;
+    document.head.appendChild(script);
+  
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
 
   // 입력값 유효성 검증
   const validateForm = (): boolean => {
@@ -89,17 +95,6 @@ const SignupForm = () => {
       newErrors.contact = '올바른 연락처 형식이 아닙니다';
     }
 
-    // 주소 검증
-    if (!formData.address.address.trim()) {
-      newErrors.address = { ...newErrors.address, address: '주소를 입력해주세요' };
-    }
-    if (!formData.address.city.trim()) {
-      newErrors.address = { ...newErrors.address, city: '도시를 입력해주세요' };
-    }
-    if (!/^\d{5}$/.test(formData.address.postalCode)) {
-      newErrors.address = { ...newErrors.address, postalCode: '올바른 우편번호 형식이 아닙니다' };
-    }
-
     // 카드 정보 검증
     if (!/^\d{16}$/.test(formData.paymentMethod.cardNumber.replace(/\s/g, ''))) {
       newErrors.paymentMethod = { ...newErrors.paymentMethod, cardNumber: '올바른 카드번호 형식이 아닙니다' };
@@ -110,6 +105,27 @@ const SignupForm = () => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const openPostcode = () => {
+    if (!window.daum) {
+      alert('우편번호 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+  
+    new window.daum.Postcode({
+      oncomplete: (data: any) => {
+        setFormData(prev => ({
+          ...prev,
+          address: {
+            ...prev.address,
+            postalCode: data.zonecode,
+            roadAddress: data.roadAddress,
+            detailAddress: ''
+          }
+        }));
+      }
+    }).open();
   };
 
   const formatCardNumber = (value: string): string => {
@@ -317,64 +333,54 @@ const SignupForm = () => {
         {/* Address Section */}
         <div className="mb-6">
           <h3 className="block text-gray-700 font-bold mb-2">Address</h3>
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="address">
-                Street Address
-              </label>
-              <input
-                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                  errors.address?.address ? 'border-red-500' : ''
-                }`}
-                id="address"
-                type="text"
-                name="address.address"
-                value={formData.address.address}
-                onChange={handleChange}
-                required
-              />
-              {errors.address?.address && (
-                <p className="text-red-500 text-xs italic">{errors.address.address}</p>
-              )}
+          <div className="space-y-4">
+            <div className="flex items-end gap-2">
+              <div className="flex-1">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  우편번호
+                </label>
+                <input
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 bg-gray-50"
+                  type="text"
+                  value={formData.address.postalCode}
+                  readOnly
+                  placeholder="우편번호"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={openPostcode}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+              >
+                우편번호 검색
+              </button>
             </div>
+
             <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="city">
-                City
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                도로명 주소
               </label>
               <input
-                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                  errors.address?.city ? 'border-red-500' : ''
-                }`}
-                id="city"
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 bg-gray-50"
                 type="text"
-                name="address.city"
-                value={formData.address.city}
-                onChange={handleChange}
-                required
+                value={formData.address.roadAddress}
+                readOnly
+                placeholder="도로명 주소"
               />
-              {errors.address?.city && (
-                <p className="text-red-500 text-xs italic">{errors.address.city}</p>
-              )}
             </div>
+
             <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="postalCode">
-                Postal Code
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                상세주소
               </label>
               <input
-                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                  errors.address?.postalCode ? 'border-red-500' : ''
-                }`}
-                id="postalCode"
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
                 type="text"
-                name="address.postalCode"
-                placeholder="12345"
-                value={formData.address.postalCode}
+                name="address.detailAddress"
+                value={formData.address.detailAddress}
                 onChange={handleChange}
-                required
+                placeholder="상세주소를 입력하세요"
               />
-              {errors.address?.postalCode && (
-                <p className="text-red-500 text-xs italic">{errors.address.postalCode}</p>
-              )}
             </div>
           </div>
         </div>
