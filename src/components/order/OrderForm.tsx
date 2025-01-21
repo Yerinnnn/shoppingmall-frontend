@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AddressSelect } from './AddressSelect';
+import AddressSelect from './AddressSelect';
 import { PaymentSelect } from './PaymentSelect';
 import { PointInput } from './PointInput';
 
