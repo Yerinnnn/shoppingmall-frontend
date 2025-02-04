@@ -16,7 +16,7 @@ export const OrderItems: React.FC<OrderItemsProps> = ({ items, totalAmount }) =>
         {items.map((item) => (
           <div key={item.orderItemId} className="flex items-center py-4 border-b last:border-b-0">
             <img
-              src="https://via.placeholder.com/80"  // 수정
+              src="/api/placeholder/80/80"
               alt={item.productName}
               className="w-20 h-20 object-cover rounded"
             />

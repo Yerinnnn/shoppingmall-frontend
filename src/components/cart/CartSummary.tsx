@@ -17,6 +17,26 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, onClearCart }) => {
   const shippingFee = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
   const total = subtotal + shippingFee;
 
+  const handleOrderClick = () => {
+    // 장바구니가 비어있는 경우 처리
+    if (!items?.length) {
+      alert('장바구니에 상품을 담아주세요.');
+      return;
+    }
+
+    // 주문 생성 페이지로 이동하면서 장바구니 데이터 전달
+    navigate('/orders/new', {
+      state: {
+        cartItems: items,
+        summary: {
+          subtotal,
+          shippingFee,
+          total
+        }
+      }
+    });
+  };
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-lg font-semibold mb-4">주문 요약</h2>
@@ -41,7 +61,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, onClearCart }) => {
           </div>
         </div>
         <button
-          onClick={() => navigate('/checkout')}
+          onClick={handleOrderClick}
           className="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
         >
           주문하기
