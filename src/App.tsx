@@ -16,6 +16,7 @@ import OrderListPage from './pages/OrderListPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import OrderCreatePage from './pages/OrderCreatePage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentFailPage from './pages/PaymentFailPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,6 +47,7 @@ const App = () => {
                 <Route path="/orders" element={<OrderListPage />} />
                 <Route path="/orders/:orderId" element={<OrderDetailPage />} />
                 <Route path="/payments/success" element={<PaymentSuccessPage />} />
+                <Route path="/payments/fail" element={<PaymentFailPage />} />
                 <Route path="/mypage" element={<div>My Page</div>} />
               </Routes>
             </main>
