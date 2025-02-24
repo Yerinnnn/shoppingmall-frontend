@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Order } from '../../types/order';
-import { useOrder } from '../../hooks/useOrder';
+import { useOrder } from '../../contexts/order/useOrder';
 import { toast } from 'react-hot-toast';
 import {
   CANCELABLE_STATUSES,
@@ -26,7 +26,7 @@ const isConfirmable = (status: Order['status']): status is ConfirmableStatus => 
   return CONFIRMABLE_STATUSES.includes(status as ConfirmableStatus);
 };
 
-export const OrderActions: React.FC<OrderActionsProps> = ({ order, onSuccess }) => {
+const OrderActions: React.FC<OrderActionsProps> = ({ order, onSuccess }) => {
   const navigate = useNavigate();
   const { mutations: { cancelOrder, confirmOrder } } = useOrder();
 
@@ -94,3 +94,5 @@ export const OrderActions: React.FC<OrderActionsProps> = ({ order, onSuccess }) 
     </div>
   );
 };
+
+export default OrderActions;

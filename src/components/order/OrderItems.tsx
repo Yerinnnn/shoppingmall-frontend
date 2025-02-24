@@ -7,7 +7,7 @@ interface OrderItemsProps {
   totalAmount: number;
 }
 
-export const OrderItems: React.FC<OrderItemsProps> = ({ items, totalAmount }) => {
+const OrderItems: React.FC<OrderItemsProps> = ({ items, totalAmount }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
       <h3 className="text-lg font-semibold mb-4">주문 상품</h3>
@@ -53,3 +53,5 @@ export const OrderItems: React.FC<OrderItemsProps> = ({ items, totalAmount }) =>
     </div>
   );
 };
+
+export default OrderItems;

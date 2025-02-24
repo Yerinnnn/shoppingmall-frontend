@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CreditCard, FileText, Wallet } from 'lucide-react';
-import { PaymentMethod, PaymentType } from '../../types/payment';
 import { log } from 'console';
+import { PaymentMethod, PaymentType } from '../../types/payment';
 
 interface PaymentSelectProps {
   selectedPaymentType: PaymentType | null;
@@ -29,7 +29,7 @@ const PAYMENT_TYPE_INFO = {
   }
 };
 
-export const PaymentSelect: React.FC<PaymentSelectProps> = ({
+const PaymentSelect: React.FC<PaymentSelectProps> = ({
   selectedPaymentType,
   selectedMethodId,
   onSelectPaymentType,
@@ -183,3 +183,5 @@ useEffect(() => {
     </div>
   );
 };
+
+export default PaymentSelect;

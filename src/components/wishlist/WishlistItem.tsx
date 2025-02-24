@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Trash2, ShoppingCart } from 'lucide-react';
-import { WishlistItem as WishlistItemType } from '../../types/wishlist';
-import { useCart } from '../../hooks/useCart';
 import { toast } from 'react-hot-toast';
+import { WishlistItem as WishlistItemType } from '../../types/wishlist';
+import { useCart } from '../../contexts/cart/useCart';
 
 interface WishlistItemProps {
   item: WishlistItemType;

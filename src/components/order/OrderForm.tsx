@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AddressSelect from './AddressSelect';
-import { PaymentSelect } from './PaymentSelect';
-import { PointInput } from './PointInput';
+import PaymentSelect from './PaymentSelect';
+import PointInput from './PointInput';
 import { PaymentType, PaymentSummary } from '../../types/payment';
 
 interface OrderFormProps {
@@ -11,7 +11,7 @@ interface OrderFormProps {
   onAddressSelect: (addressId: number) => void;
 }
 
-export const OrderForm: React.FC<OrderFormProps> = ({
+const OrderForm: React.FC<OrderFormProps> = ({
   summary,
   onPaymentMethodSelect,
   onPointsUseChange,

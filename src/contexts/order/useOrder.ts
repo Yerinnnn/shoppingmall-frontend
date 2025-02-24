@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, UseQueryResult, UseQueryOptions } from '@tanstack/react-query';
-import { Order, CreateOrderRequest } from '../types/order';
 import { useNavigate } from 'react-router-dom';
+import { Order, CreateOrderRequest } from '../types/order';
 
 // Query keys
 export const orderKeys = {

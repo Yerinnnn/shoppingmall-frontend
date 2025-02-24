@@ -1,6 +1,6 @@
 import React from 'react';
+import { useAuth } from '../contexts/auth/AuthContext';
 import LoginForm from '../components/auth/LoginForm';
-import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage: React.FC = () => {
   const { login } = useAuth();

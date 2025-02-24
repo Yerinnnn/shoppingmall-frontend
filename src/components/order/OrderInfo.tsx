@@ -1,13 +1,13 @@
 import React from 'react';
 import { format } from 'date-fns';
-import { Order} from '../../types/order';
+import { Order } from '../../types/order';
 import { ORDER_STATUS_COLORS, orderStatusLabels } from '../../constants/order';
 
 interface OrderInfoProps {
   order: Order;
 }
 
-export const OrderInfo: React.FC<OrderInfoProps> = ({ order }) => {
+const OrderInfo: React.FC<OrderInfoProps> = ({ order }) => {
   const statusColor = ORDER_STATUS_COLORS[order.status];
 
   return (
@@ -43,3 +43,5 @@ export const OrderInfo: React.FC<OrderInfoProps> = ({ order }) => {
     </div>
   );
 };
+
+export default OrderInfo;

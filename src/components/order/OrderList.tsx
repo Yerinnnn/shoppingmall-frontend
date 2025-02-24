@@ -1,10 +1,10 @@
 import React from 'react';
-import { useOrder } from '../../hooks/useOrder';
-import { OrderCard } from './OrderCard';
-import { ShoppingBag } from 'lucide-react';
+import { useOrder } from '../../contexts/order/useOrder';
 import { useNavigate } from 'react-router-dom';
+import { ShoppingBag } from 'lucide-react';
+import OrderCard from './OrderCard';
 
-export const OrderList: React.FC = () => {
+const OrderList: React.FC = () => {
   const navigate = useNavigate();
   const { queries: { useOrders } } = useOrder();
   const { data: orders, isLoading, error } = useOrders();
@@ -84,3 +84,5 @@ export const OrderList: React.FC = () => {
     </div>
   );
 };
+
+export default OrderList;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import ProductCard from './ProductCard';
 import { Product } from '../../types/product';
+import ProductCard from './ProductCard';
 
 interface ProductListProps {
   categoryId: number | null;

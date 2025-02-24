@@ -1,8 +1,8 @@
 import React from 'react';
+import { WishlistItem as WishlistItemType } from '../../types/wishlist';
 import WishlistItem from './WishlistItem';
 import WishlistSkeleton from './WishlistSkeleton';
 import EmptyWishlist from './EmptyWishlist';
-import { WishlistItem as WishlistItemType } from '../../types/wishlist';
 
 interface WishlistListProps {
   items: WishlistItemType[];

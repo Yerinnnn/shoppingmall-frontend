@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart } from 'lucide-react';
-import { useCart } from '../../hooks/useCart';
-import { useWishlist } from '../../hooks/useWishlist';
 import { toast } from 'react-hot-toast';
+import { useCart } from '../../contexts/cart/useCart';
+import { useWishlist } from '../../contexts/wishlist/useWishlist';
 
 export interface ProductCardProps {
   productId: number;

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { OrderForm } from '../components/order/OrderForm';
-import { OrderItems } from '../components/order/OrderItems';
-import { OrderPaymentSummary } from '../components/order/OrderPaymentSummary';
+import { toast } from 'react-hot-toast';
 import { PaymentType, PaymentSummary } from '../types/payment';
 import { CartItem } from '../types/cart';
 import { OrderItem } from '../types/order';
-import { toast } from 'react-hot-toast';
+import OrderForm from '../components/order/OrderForm';
+import OrderItems from '../components/order/OrderItems';
+import OrderPaymentSummary from '../components/order/OrderPaymentSummary';
 
 interface LocationState {
   cartItems: CartItem[];

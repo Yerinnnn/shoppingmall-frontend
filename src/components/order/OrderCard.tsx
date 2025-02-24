@@ -8,7 +8,7 @@ interface OrderCardProps {
   order: Order;
 }
 
-export const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
+const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
   const getStatusColor = (status: Order['status']) => {
     switch (status) {
       case 'CANCELLED':
@@ -79,3 +79,5 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
     </div>
   );
 };
+
+export default OrderCard;

@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '../contexts/AuthContext';
-import { WishlistItem } from '../types/wishlist';
 import { useNavigate } from 'react-router-dom';
+import { WishlistItem } from '../../types/wishlist';
+import { useAuth } from '../../contexts/auth/AuthContext';
 
 const WISHLIST_QUERY_KEY = ['wishlist'] as const;
 

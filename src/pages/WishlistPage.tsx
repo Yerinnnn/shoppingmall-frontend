@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import WishlistList from '../components/wishlist/WishlistList';
-import { useWishlist } from '../hooks/useWishlist';
 import { Heart, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import WishlistList from '../components/wishlist/WishlistList';
+import { useWishlist } from '../contexts/wishlist/useWishlist';
 
 const WishlistPage: React.FC = () => {
   const navigate = useNavigate();

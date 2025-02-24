@@ -1,10 +1,15 @@
-import { AuthProvider } from './contexts/AuthContext';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/auth/AuthContext';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'react-hot-toast';
-import { Header } from './components/layout/Header';
-import { Footer } from './components/layout/Footer';
+
+// 레이아웃 컴포넌트
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+import AdminLayout from './components/admin/layout/AdminLayout';
+
+// 일반 페이지
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -17,6 +22,13 @@ import OrderDetailPage from './pages/OrderDetailPage';
 import OrderCreatePage from './pages/OrderCreatePage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentFailPage from './pages/PaymentFailPage';
+
+// 관리자 페이지
+import AdminProductPage from './pages/admin/ProductPage';
+import AdminOrderPage from './pages/admin/OrderPage';
+import AdminMemberPage from './pages/admin/MemberPage';
+import AdminReviewPage from './pages/admin/ReviewPage';
+import AdminShippingPage from './pages/admin/ShippingPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +61,16 @@ const App = () => {
                 <Route path="/payments/success" element={<PaymentSuccessPage />} />
                 <Route path="/payments/fail" element={<PaymentFailPage />} />
                 <Route path="/mypage" element={<div>My Page</div>} />
+
+                {/* Admin Routes */}
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<Navigate to="/admin/products" />} />
+                  <Route path="products" element={<AdminProductPage />} />
+                  <Route path="orders" element={<AdminOrderPage />} />
+                  <Route path="members" element={<AdminMemberPage />} />
+                  <Route path="reviews" element={<AdminReviewPage />} />
+                  <Route path="shipping" element={<AdminShippingPage />} />
+                </Route>
               </Routes>
             </main>
             <Footer />

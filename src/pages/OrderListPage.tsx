@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { OrderList } from '../components/order/OrderList';
 import { OrderStatus } from '../types/order';
 import { orderStatusLabels } from '../constants/order'
+import OrderList from '../components/order/OrderList';
 
 const OrderListPage: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | 'ALL'>('ALL');

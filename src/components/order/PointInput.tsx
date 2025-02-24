@@ -6,7 +6,7 @@ interface PointInputProps {
   onChange: (points: number) => void;
 }
 
-export const PointInput: React.FC<PointInputProps> = ({
+const PointInput: React.FC<PointInputProps> = ({
   maxPoints,
   maxAmount,
   onChange
@@ -62,3 +62,5 @@ export const PointInput: React.FC<PointInputProps> = ({
     </div>
   );
 };
+
+export default PointInput;

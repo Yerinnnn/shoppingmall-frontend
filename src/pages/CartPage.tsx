@@ -1,10 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ShoppingBag } from 'lucide-react';
+import { useCart } from '../contexts/cart/useCart';
 import CartList from '../components/cart/CartList';
 import CartSummary from '../components/cart/CartSummary';
 import EmptyCart from '../components/cart/EmptyCart';
-import { useCart } from '../hooks/useCart';
-import { ShoppingBag } from 'lucide-react';
 
 const CartPage: React.FC = () => {
   const navigate = useNavigate();

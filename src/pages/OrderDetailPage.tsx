@@ -1,10 +1,10 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
-import { useOrder } from '../hooks/useOrder';
-import { OrderInfo } from '../components/order/OrderInfo';
-import { OrderItems } from '../components/order/OrderItems';
-import { OrderActions } from '../components/order/OrderActions';
+import { useOrder } from '../contexts/order/useOrder';
+import OrderInfo from '../components/order/OrderInfo';
+import OrderItems from '../components/order/OrderItems';
+import OrderActions from '../components/order/OrderActions';
 
 const OrderDetailPage: React.FC = () => {
   const { orderId } = useParams();

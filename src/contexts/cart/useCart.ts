@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '../contexts/AuthContext';
-import { CartItem } from '../types/cart';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/auth/AuthContext';
+import { CartItem } from '../../types/cart';
 
 const CART_QUERY_KEY = ['cart'] as const;
 

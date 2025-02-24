@@ -15,7 +15,7 @@ interface OrderPaymentSummaryProps {
 // 결제 타입별 처리 함수 타입
 type PaymentHandler = () => Promise<void>;
 
-export const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
+const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
   orderId,
   orderName,
   summary,
@@ -229,3 +229,5 @@ export const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
     </div>
   );
 };
+
+export default OrderPaymentSummary;

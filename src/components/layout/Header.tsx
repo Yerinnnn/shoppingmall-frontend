@@ -1,9 +1,9 @@
 import React from 'react';
 import { Search, ShoppingCart, Heart, User, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/auth/AuthContext';
 
-export const Header = () => {
+const Header = () =>{
   const { isAuthenticated, username, logout } = useAuth();
 
   return (
@@ -52,3 +52,5 @@ export const Header = () => {
     </header>
   );
 };
+
+export default Header;

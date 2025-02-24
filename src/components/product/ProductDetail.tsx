@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { Heart, ShoppingCart, Truck } from 'lucide-react';
-import { useCart } from '../../hooks/useCart';
-import { useWishlist } from '../../hooks/useWishlist';
+import { useCart } from '../../contexts/cart/useCart';
+import { useWishlist } from '../../contexts/wishlist/useWishlist';
 import { Product } from '../../types/product';
 
 interface ProductDetail {
