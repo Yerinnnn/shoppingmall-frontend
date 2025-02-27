@@ -1,0 +1,5596 @@
+# 파일 구조
+
+├── src
+    ├── index.tsx
+    ├── App.tsx
+    ├── App.test.tsx
+    ├── setupProxy.js
+    ├── App.css
+    ├── index.css
+    ├── setupTests.ts
+    ├── reportWebVitals.ts
+    ├── directory_to_text.py
+    ├── react-app-env.d.ts
+    ├── logo.svg
+    ├── output.txt
+    ├── types
+        ├── payment.ts
+        ├── product.ts
+        ├── wishlist.ts
+        ├── order.ts
+        ├── cart.ts
+        ├── auth.ts
+        ├── address.ts
+    ├── contexts
+        ├── directory_to_text.py
+        ├── AuthContext.tsx
+    ├── constants
+        ├── order.ts
+    ├── components
+        ├── order
+            ├── OrderForm.tsx
+            ├── OrderActions.tsx
+            ├── AddressSelect.tsx
+            ├── OrderPaymentSummary.tsx
+            ├── OrderList.tsx
+            ├── PaymentSelect.tsx
+            ├── PointInput.tsx
+            ├── OrderItems.tsx
+            ├── OrderInfo.tsx
+            ├── OrderCard.tsx
+        ├── auth
+            ├── LoginForm.tsx
+            ├── SignupForm.tsx
+        ├── layout
+            ├── Footer.tsx
+            ├── Layout.tsx
+            ├── Header.tsx
+        ├── admin
+        ├── shipping
+        ├── product
+            ├── ProductList.tsx
+            ├── CategoryList.tsx
+            ├── ProductCard.tsx
+            ├── ProductDetail.tsx
+        ├── cart
+            ├── CartSkeleton.tsx
+            ├── CartItem.tsx
+            ├── CartSummary.tsx
+            ├── CartList.tsx
+            ├── QuantityInput.tsx
+            ├── EmptyCart.tsx
+        ├── wishlist
+            ├── WishlistItem.tsx
+            ├── WishlistSkeleton.tsx
+            ├── EmptyWishlist.tsx
+            ├── WishlistList.tsx
+    ├── hooks
+        ├── useWishlist.ts
+        ├── useCart.ts
+        ├── useOrder.ts
+    ├── api
+    ├── pages
+        ├── LoginPage.tsx
+        ├── OrderDetailPage.tsx
+        ├── CartPage.tsx
+        ├── PaymentFailPage.tsx
+        ├── PaymentSuccessPage.tsx
+        ├── WishlistPage.tsx
+        ├── OrderCreatePage.tsx
+        ├── OrderListPage.tsx
+        ├── ProductPage.tsx
+        ├── SignupPage.tsx
+        ├── ProductDetailPage.tsx
+        ├── HomePage.tsx
+
+# 파일 내용
+
+## /Users/yerin/Desktop/shopping-mall/frontend/src
+
+### index.tsx
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
+
+
+### App.tsx
+
+import { AuthProvider } from './contexts/AuthContext';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Toaster } from 'react-hot-toast';
+import { Header } from './components/layout/Header';
+import { Footer } from './components/layout/Footer';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import ProductPage from './pages/ProductPage';
+import ProductDetailPage from './pages/ProductDetailPage';
+import CartPage from './pages/CartPage';
+import WishlistPage from './pages/WishlistPage';
+import OrderListPage from './pages/OrderListPage';
+import OrderDetailPage from './pages/OrderDetailPage';
+import OrderCreatePage from './pages/OrderCreatePage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentFailPage from './pages/PaymentFailPage';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <BrowserRouter>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow container mx-auto px-4 py-8">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route path="/products/*" element={<ProductPage />} />
+                <Route path="/products/:id" element={<ProductDetailPage />} />
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/wishlist" element={<WishlistPage />} />
+                <Route path="/orders/new" element={<OrderCreatePage />} />
+                <Route path="/orders" element={<OrderListPage />} />
+                <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+                <Route path="/payments/success" element={<PaymentSuccessPage />} />
+                <Route path="/payments/fail" element={<PaymentFailPage />} />
+                <Route path="/mypage" element={<div>My Page</div>} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+          <Toaster position="top-center" />
+        </BrowserRouter>
+      </AuthProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  );
+};
+
+export default App;
+
+### App.test.tsx
+
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import App from './App';
+
+test('renders learn react link', () => {
+  render(<App />);
+  const linkElement = screen.getByText(/learn react/i);
+  expect(linkElement).toBeInTheDocument();
+});
+
+
+### setupProxy.js
+
+const { createProxyMiddleware } = require('http-proxy-middleware');
+
+module.exports = function(app) {
+  app.use(
+    '/api',
+    createProxyMiddleware({
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+      onProxyReq: (proxyReq, req, res) => {
+        console.log('Proxy Request:', {
+          method: req.method,
+          path: req.path,
+          body: req.body
+        });
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log('Proxy Response:', {
+          status: proxyRes.statusCode,
+          headers: proxyRes.headers
+        });
+      },
+      onError: (err, req, res) => {
+        console.error('Proxy Error:', err);
+      }
+    })
+  );
+};
+
+### App.css
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+### index.css
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  @apply bg-gray-50;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+#root {
+  @apply min-h-screen flex flex-col;
+}
+
+### setupTests.ts
+
+// jest-dom adds custom jest matchers for asserting on DOM nodes.
+// allows you to do things like:
+// expect(element).toHaveTextContent(/react/i)
+// learn more: https://github.com/testing-library/jest-dom
+import '@testing-library/jest-dom';
+
+
+### reportWebVitals.ts
+
+import { ReportHandler } from 'web-vitals';
+
+const reportWebVitals = (onPerfEntry?: ReportHandler) => {
+  if (onPerfEntry && onPerfEntry instanceof Function) {
+    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+      getCLS(onPerfEntry);
+      getFID(onPerfEntry);
+      getFCP(onPerfEntry);
+      getLCP(onPerfEntry);
+      getTTFB(onPerfEntry);
+    });
+  }
+};
+
+export default reportWebVitals;
+
+
+### directory_to_text.py
+
+# -*- coding: utf-8 -*-
+import os
+
+def write_directory_structure(output_file, root_dir, exclude_dirs, exclude_files):
+    def get_indent(level):
+        return "    " * level + "├── "
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write("# 파일 구조\n\n")
+        tree = []
+        
+        for dirpath, dirnames, filenames in os.walk(root_dir):
+            dirnames[:] = [d for d in dirnames if d not in exclude_dirs]
+            filenames = [f for f in filenames if f not in exclude_files]
+            
+            indent_level = dirpath.replace(root_dir, "").count(os.sep)
+            tree.append(get_indent(indent_level) + os.path.basename(dirpath))
+            
+            for filename in filenames:
+                tree.append(get_indent(indent_level + 1) + filename)
+        
+        f.write("\n".join(tree) + "\n\n")
+        f.write("# 파일 내용\n\n")
+        
+        for dirpath, dirnames, filenames in os.walk(root_dir):
+            dirnames[:] = [d for d in dirnames if d not in exclude_dirs]
+            filenames = [f for f in filenames if f not in exclude_files]
+            
+            if filenames:
+                f.write(f"## {dirpath}\n\n")
+                for filename in filenames:
+                    file_path = os.path.join(dirpath, filename)
+                    try:
+                        with open(file_path, "r", encoding="utf-8", errors="ignore") as file:
+                            content = file.read()
+                        f.write(f"### {filename}\n\n")
+                        f.write(content + "\n\n")
+                    except Exception as e:
+                        f.write(f"### {filename}\n\n(파일을 읽을 수 없음: {e})\n\n")
+
+if __name__ == "__main__":
+    root_directory = os.getcwd()
+    output_filename = "output.txt"
+    excluded_dirs = {"log", "node_modules", ".git"}
+    excluded_files = {".DS_Store"}
+    write_directory_structure(output_filename, root_directory, excluded_dirs, excluded_files)
+    print(f"정리 완료! 결과는 {output_filename} 파일을 확인하세요.")
+
+### react-app-env.d.ts
+
+/// <reference types="react-scripts" />
+
+
+### logo.svg
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 841.9 595.3"><g fill="#61DAFB"><path d="M666.3 296.5c0-32.5-40.7-63.3-103.1-82.4 14.4-63.6 8-114.2-20.2-130.4-6.5-3.8-14.1-5.6-22.4-5.6v22.3c4.6 0 8.3.9 11.4 2.6 13.6 7.8 19.5 37.5 14.9 75.7-1.1 9.4-2.9 19.3-5.1 29.4-19.6-4.8-41-8.5-63.5-10.9-13.5-18.5-27.5-35.3-41.6-50 32.6-30.3 63.2-46.9 84-46.9V78c-27.5 0-63.5 19.6-99.9 53.6-36.4-33.8-72.4-53.2-99.9-53.2v22.3c20.7 0 51.4 16.5 84 46.6-14 14.7-28 31.4-41.3 49.9-22.6 2.4-44 6.1-63.6 11-2.3-10-4-19.7-5.2-29-4.7-38.2 1.1-67.9 14.6-75.8 3-1.8 6.9-2.6 11.5-2.6V78.5c-8.4 0-16 1.8-22.6 5.6-28.1 16.2-34.4 66.7-19.9 130.1-62.2 19.2-102.7 49.9-102.7 82.3 0 32.5 40.7 63.3 103.1 82.4-14.4 63.6-8 114.2 20.2 130.4 6.5 3.8 14.1 5.6 22.5 5.6 27.5 0 63.5-19.6 99.9-53.6 36.4 33.8 72.4 53.2 99.9 53.2 8.4 0 16-1.8 22.6-5.6 28.1-16.2 34.4-66.7 19.9-130.1 62-19.1 102.5-49.9 102.5-82.3zm-130.2-66.7c-3.7 12.9-8.3 26.2-13.5 39.5-4.1-8-8.4-16-13.1-24-4.6-8-9.5-15.8-14.4-23.4 14.2 2.1 27.9 4.7 41 7.9zm-45.8 106.5c-7.8 13.5-15.8 26.3-24.1 38.2-14.9 1.3-30 2-45.2 2-15.1 0-30.2-.7-45-1.9-8.3-11.9-16.4-24.6-24.2-38-7.6-13.1-14.5-26.4-20.8-39.8 6.2-13.4 13.2-26.8 20.7-39.9 7.8-13.5 15.8-26.3 24.1-38.2 14.9-1.3 30-2 45.2-2 15.1 0 30.2.7 45 1.9 8.3 11.9 16.4 24.6 24.2 38 7.6 13.1 14.5 26.4 20.8 39.8-6.3 13.4-13.2 26.8-20.7 39.9zm32.3-13c5.4 13.4 10 26.8 13.8 39.8-13.1 3.2-26.9 5.9-41.2 8 4.9-7.7 9.8-15.6 14.4-23.7 4.6-8 8.9-16.1 13-24.1zM421.2 430c-9.3-9.6-18.6-20.3-27.8-32 9 .4 18.2.7 27.5.7 9.4 0 18.7-.2 27.8-.7-9 11.7-18.3 22.4-27.5 32zm-74.4-58.9c-14.2-2.1-27.9-4.7-41-7.9 3.7-12.9 8.3-26.2 13.5-39.5 4.1 8 8.4 16 13.1 24 4.7 8 9.5 15.8 14.4 23.4zM420.7 163c9.3 9.6 18.6 20.3 27.8 32-9-.4-18.2-.7-27.5-.7-9.4 0-18.7.2-27.8.7 9-11.7 18.3-22.4 27.5-32zm-74 58.9c-4.9 7.7-9.8 15.6-14.4 23.7-4.6 8-8.9 16-13 24-5.4-13.4-10-26.8-13.8-39.8 13.1-3.1 26.9-5.8 41.2-7.9zm-90.5 125.2c-35.4-15.1-58.3-34.9-58.3-50.6 0-15.7 22.9-35.6 58.3-50.6 8.6-3.7 18-7 27.7-10.1 5.7 19.6 13.2 40 22.5 60.9-9.2 20.8-16.6 41.1-22.2 60.6-9.9-3.1-19.3-6.5-28-10.2zM310 490c-13.6-7.8-19.5-37.5-14.9-75.7 1.1-9.4 2.9-19.3 5.1-29.4 19.6 4.8 41 8.5 63.5 10.9 13.5 18.5 27.5 35.3 41.6 50-32.6 30.3-63.2 46.9-84 46.9-4.5-.1-8.3-1-11.3-2.7zm237.2-76.2c4.7 38.2-1.1 67.9-14.6 75.8-3 1.8-6.9 2.6-11.5 2.6-20.7 0-51.4-16.5-84-46.6 14-14.7 28-31.4 41.3-49.9 22.6-2.4 44-6.1 63.6-11 2.3 10.1 4.1 19.8 5.2 29.1zm38.5-66.7c-8.6 3.7-18 7-27.7 10.1-5.7-19.6-13.2-40-22.5-60.9 9.2-20.8 16.6-41.1 22.2-60.6 9.9 3.1 19.3 6.5 28.1 10.2 35.4 15.1 58.3 34.9 58.3 50.6-.1 15.7-23 35.6-58.4 50.6zM320.8 78.4z"/><circle cx="420.9" cy="296.5" r="45.7"/><path d="M520.5 78.1z"/></g></svg>
+
+### output.txt
+
+# 파일 구조
+
+├── src
+    ├── index.tsx
+    ├── App.tsx
+    ├── App.test.tsx
+    ├── setupProxy.js
+    ├── App.css
+    ├── index.css
+    ├── setupTests.ts
+    ├── reportWebVitals.ts
+    ├── directory_to_text.py
+    ├── react-app-env.d.ts
+    ├── logo.svg
+    ├── output.txt
+    ├── types
+        ├── payment.ts
+        ├── product.ts
+        ├── wishlist.ts
+        ├── order.ts
+        ├── cart.ts
+        ├── auth.ts
+        ├── address.ts
+    ├── contexts
+        ├── directory_to_text.py
+        ├── AuthContext.tsx
+    ├── constants
+        ├── order.ts
+    ├── components
+        ├── order
+            ├── OrderForm.tsx
+            ├── OrderActions.tsx
+            ├── AddressSelect.tsx
+            ├── OrderPaymentSummary.tsx
+            ├── OrderList.tsx
+            ├── PaymentSelect.tsx
+            ├── PointInput.tsx
+            ├── OrderItems.tsx
+            ├── OrderInfo.tsx
+            ├── OrderCard.tsx
+        ├── auth
+            ├── LoginForm.tsx
+            ├── SignupForm.tsx
+        ├── layout
+            ├── Footer.tsx
+            ├── Layout.tsx
+            ├── Header.tsx
+        ├── admin
+        ├── shipping
+        ├── product
+            ├── ProductList.tsx
+            ├── CategoryList.tsx
+            ├── ProductCard.tsx
+            ├── ProductDetail.tsx
+        ├── cart
+            ├── CartSkeleton.tsx
+            ├── CartItem.tsx
+            ├── CartSummary.tsx
+            ├── CartList.tsx
+            ├── QuantityInput.tsx
+            ├── EmptyCart.tsx
+        ├── wishlist
+            ├── WishlistItem.tsx
+            ├── WishlistSkeleton.tsx
+            ├── EmptyWishlist.tsx
+            ├── WishlistList.tsx
+    ├── hooks
+        ├── useWishlist.ts
+        ├── useCart.ts
+        ├── useOrder.ts
+    ├── api
+    ├── pages
+        ├── LoginPage.tsx
+        ├── OrderDetailPage.tsx
+        ├── CartPage.tsx
+        ├── PaymentFailPage.tsx
+        ├── PaymentSuccessPage.tsx
+        ├── WishlistPage.tsx
+        ├── OrderCreatePage.tsx
+        ├── OrderListPage.tsx
+        ├── ProductPage.tsx
+        ├── SignupPage.tsx
+        ├── ProductDetailPage.tsx
+        ├── HomePage.tsx
+
+# 파일 내용
+
+## /Users/yerin/Desktop/shopping-mall/frontend/src
+
+### index.tsx
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
+
+
+### App.tsx
+
+import { AuthProvider } from './contexts/AuthContext';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Toaster } from 'react-hot-toast';
+import { Header } from './components/layout/Header';
+import { Footer } from './components/layout/Footer';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import ProductPage from './pages/ProductPage';
+import ProductDetailPage from './pages/ProductDetailPage';
+import CartPage from './pages/CartPage';
+import WishlistPage from './pages/WishlistPage';
+import OrderListPage from './pages/OrderListPage';
+import OrderDetailPage from './pages/OrderDetailPage';
+import OrderCreatePage from './pages/OrderCreatePage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentFailPage from './pages/PaymentFailPage';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <BrowserRouter>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow container mx-auto px-4 py-8">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route path="/products/*" element={<ProductPage />} />
+                <Route path="/products/:id" element={<ProductDetailPage />} />
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/wishlist" element={<WishlistPage />} />
+                <Route path="/orders/new" element={<OrderCreatePage />} />
+                <Route path="/orders" element={<OrderListPage />} />
+                <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+                <Route path="/payments/success" element={<PaymentSuccessPage />} />
+                <Route path="/payments/fail" element={<PaymentFailPage />} />
+                <Route path="/mypage" element={<div>My Page</div>} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+          <Toaster position="top-center" />
+        </BrowserRouter>
+      </AuthProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  );
+};
+
+export default App;
+
+### App.test.tsx
+
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import App from './App';
+
+test('renders learn react link', () => {
+  render(<App />);
+  const linkElement = screen.getByText(/learn react/i);
+  expect(linkElement).toBeInTheDocument();
+});
+
+
+### setupProxy.js
+
+const { createProxyMiddleware } = require('http-proxy-middleware');
+
+module.exports = function(app) {
+  app.use(
+    '/api',
+    createProxyMiddleware({
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+      onProxyReq: (proxyReq, req, res) => {
+        console.log('Proxy Request:', {
+          method: req.method,
+          path: req.path,
+          body: req.body
+        });
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log('Proxy Response:', {
+          status: proxyRes.statusCode,
+          headers: proxyRes.headers
+        });
+      },
+      onError: (err, req, res) => {
+        console.error('Proxy Error:', err);
+      }
+    })
+  );
+};
+
+### App.css
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+### index.css
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  @apply bg-gray-50;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+#root {
+  @apply min-h-screen flex flex-col;
+}
+
+### setupTests.ts
+
+// jest-dom adds custom jest matchers for asserting on DOM nodes.
+// allows you to do things like:
+// expect(element).toHaveTextContent(/react/i)
+// learn more: https://github.com/testing-library/jest-dom
+import '@testing-library/jest-dom';
+
+
+
+
+## /Users/yerin/Desktop/shopping-mall/frontend/src/types
+
+### payment.ts
+
+// 결제 수단 타입 정의
+export enum PaymentType {
+    CARD = 'CARD',          // 카드결제/간편결제
+    VIRTUAL = 'VIRTUAL',    // 무통장입금
+    NORMAL = 'NORMAL'       // 일반결제
+  }
+  
+  // 저장된 결제수단 인터페이스
+  export interface PaymentMethod {
+    paymentMethodId: number;
+    paymentType: string;
+    cardNumber: string;
+    expiryDate: string;
+    isDefault: boolean;
+  }
+  
+  // 결제 요약 정보 인터페이스
+  export interface PaymentSummary {
+    subtotal: number;       // 상품 금액
+    shippingFee: number;    // 배송비
+    discount: number;       // 할인 금액
+    pointsUsed: number;     // 사용 포인트
+    total: number;         // 최종 결제 금액
+  }
+  
+  // 결제 응답 인터페이스
+  export interface PaymentResponse {
+    paymentKey: string;
+    orderId: string;
+    amount: number;
+  }
+  
+  // 결제 상태 인터페이스
+  export interface PaymentStatus {
+    processing: boolean;
+    error: string | null;
+    success: boolean;
+  }
+
+### product.ts
+
+export interface Product {
+  productId: number;
+  name: string;
+  price: number;
+  description: string;
+  stockQuantity: number;
+  categoryName: string;
+  createdAt: string;
+}
+
+export interface ProductDetail {
+  productDetailId: number;
+  content: string;
+  imageUrls: string[];
+  manufacturer: string;
+  origin: string;
+  material: string;
+  size: string;
+  weight: string;
+  viewCount: number;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface Category {
+  categoryId: number;
+  name: string;
+  description: string;
+  productCount: number;
+}
+
+export interface CartItem {
+  productId: number;
+  quantity: number;
+}
+
+### wishlist.ts
+
+export interface WishlistItem {
+  wishlistId: number;
+  productId: number;
+  productName: string;
+  price: number;
+  addedAt: string;
+}
+
+export interface WishlistMutations {
+  addToWishlist: (productId: number) => Promise<void>;
+  removeFromWishlist: (wishlistId: number) => Promise<void>;
+  checkInWishlist: (productId: number) => Promise<boolean>;
+}
+
+### order.ts
+
+export type OrderStatus = 
+  | 'PENDING'      // 주문 대기
+  | 'PAID'         // 결제 완료
+  | 'PREPARING'    // 상품 준비중
+  | 'SHIPPING'     // 배송중
+  | 'DELIVERED'    // 배송 완료
+  | 'COMPLETED'    // 주문 완료
+  | 'CANCELLED';   // 주문 취소
+
+export interface OrderItem {
+  orderItemId: number;
+  productId: number;
+  productName: string;
+  quantity: number;
+  price: number;
+  subtotal: number;
+}
+
+export interface Order {
+  orderId: number;
+  orderNumber: string;
+  status: OrderStatus;
+  totalAmount: number;
+  items: OrderItem[];
+  deliveryAddress: string;
+  paymentMethod: string;
+  createdAt: string;
+}
+
+export interface CreateOrderRequest {
+  deliveryAddressId: number;
+  paymentMethodId: number;
+  usePoints: number;
+  items: {
+    productId: number;
+    quantity: number;
+  }[];
+}
+
+### cart.ts
+
+export interface CartItem {
+  cartId: number;
+  productId: number;
+  productName: string;
+  price: number;
+  quantity: number;
+  totalPrice: number;
+}
+
+export interface CartMutations {
+  updateQuantity: (cartId: number, quantity: number) => Promise<void>;
+  removeItem: (cartId: number) => Promise<void>;
+  clearCart: () => Promise<void>;
+}
+
+### auth.ts
+
+export interface LoginRequest {
+    username: string;
+    password: string;
+  }
+  
+  export interface AuthResponse {
+    token: string;
+    username: string;
+  }
+
+### address.ts
+
+export interface Address {
+    addressId: number;
+    postalCode: string;
+    roadAddress: string;
+    detailAddress: string;
+    fullAddress: string;
+}
+  
+// 주소 폼 데이터 타입
+export interface AddressForm {
+    postalCode: string;    // 우편번호
+    roadAddress: string;   // 도로명 주소
+    detailAddress: string; // 상세주소
+}
+
+// 주소 응답 데이터 타입
+export interface AddressResponse {
+    id: number;
+    postalCode: string;
+    roadAddress: string;
+    detailAddress: string;
+    fullAddress: string;
+}
+
+## /Users/yerin/Desktop/shopping-mall/frontend/src/contexts
+
+### directory_to_text.py
+
+# -*- coding: utf-8 -*-
+import os
+
+def write_directory_structure(output_file, root_dir, exclude_dirs, exclude_files):
+    def get_indent(level):
+        return "    " * level + "├── "
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write("# 파일 구조\n\n")
+        tree = []
+        
+        for dirpath, dirnames, filenames in os.walk(root_dir):
+            dirnames[:] = [d for d in dirnames if d not in exclude_dirs]
+            filenames = [f for f in filenames if f not in exclude_files]
+            
+            indent_level = dirpath.replace(root_dir, "").count(os.sep)
+            tree.append(get_indent(indent_level) + os.path.basename(dirpath))
+            
+            for filename in filenames:
+                tree.append(get_indent(indent_level + 1) + filename)
+        
+        f.write("\n".join(tree) + "\n\n")
+        f.write("# 파일 내용\n\n")
+        
+        for dirpath, dirnames, filenames in os.walk(root_dir):
+            dirnames[:] = [d for d in dirnames if d not in exclude_dirs]
+            filenames = [f for f in filenames if f not in exclude_files]
+            
+            if filenames:
+                f.write(f"## {dirpath}\n\n")
+                for filename in filenames:
+                    file_path = os.path.join(dirpath, filename)
+                    try:
+                        with open(file_path, "r", encoding="utf-8", errors="ignore") as file:
+                            content = file.read()
+                        f.write(f"### {filename}\n\n")
+                        f.write(content + "\n\n")
+                    except Exception as e:
+                        f.write(f"### {filename}\n\n(파일을 읽을 수 없음: {e})\n\n")
+
+if __name__ == "__main__":
+    root_directory = os.getcwd()
+    output_filename = "contexts_fileTree.txt"
+    excluded_dirs = {"log", "node_modules", ".git"}
+    excluded_files = {".DS_Store"}
+    write_directory_structure(output_filename, root_directory, excluded_dirs, excluded_files)
+    print(f"정리 완료! 결과는 {output_filename} 파일을 확인하세요.")
+
+### AuthContext.tsx
+
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+// 인증 관련 상태와 함수들의 타입 정의
+interface AuthContextType {
+ isAuthenticated: boolean;      // 로그인 여부
+ username: string | null;       // 로그인한 사용자명
+ login: (token: string, username: string) => void; // 로그인 함수
+ logout: () => void;           // 로그아웃 함수
+}
+
+// AuthContext 생성
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+ const [isAuthenticated, setIsAuthenticated] = useState(false);
+ const [username, setUsername] = useState<string | null>(null);
+
+ // 컴포넌트 마운트 시 로컬 스토리지의 토큰 확인
+ useEffect(() => {
+   const token = localStorage.getItem('auth_token');
+   if (token) {
+     // 토큰이 있으면 사용자 정보 요청
+     fetch('/api/members/me', {
+       headers: {
+         'Authorization': `Bearer ${token}`
+       }
+     })
+     .then(response => response.json())
+     .then(data => {
+       setIsAuthenticated(true);
+       setUsername(data.username);
+     })
+     .catch(() => {
+       // 토큰이 유효하지 않으면 로그아웃 처리
+       localStorage.removeItem('auth_token');
+       setIsAuthenticated(false);
+       setUsername(null);
+     });
+   }
+ }, []); // 빈 배열: 컴포넌트 마운트 시에만 실행
+
+ // 로그인 함수: 토큰 저장 및 상태 업데이트
+ const login = (token: string, username: string) => {
+  localStorage.setItem('auth_token', token);
+  setIsAuthenticated(true); 
+  setUsername(username);  // 즉시 상태 업데이트
+};
+
+ // 로그아웃 함수: 토큰 제거 및 상태 초기화
+ const logout = () => {
+   localStorage.removeItem('auth_token');
+   setIsAuthenticated(false);
+   setUsername(null);
+ };
+
+ // Context Provider를 통해 상태와 함수들을 하위 컴포넌트에 제공
+ return (
+   <AuthContext.Provider value={{ isAuthenticated, username, login, logout }}>
+     {children}
+   </AuthContext.Provider>
+ );
+};
+
+// 커스텀 Hook: 인증 컨텍스트 사용을 쉽게 만듦
+export const useAuth = () => {
+ const context = useContext(AuthContext);
+ if (context === undefined) {
+   throw new Error('useAuth must be used within an AuthProvider');
+ }
+ return context;
+};
+
+export default AuthContext;
+
+## /Users/yerin/Desktop/shopping-mall/frontend/src/constants
+
+### order.ts
+
+import { OrderStatus } from '../types/order';
+
+export const orderStatusLabels: Record<OrderStatus, string> = {
+  PENDING: '주문 대기',
+  PAID: '결제 완료',
+  PREPARING: '상품 준비중',
+  SHIPPING: '배송중',
+  DELIVERED: '배송 완료',
+  COMPLETED: '구매 확정',
+  CANCELLED: '주문 취소'
+};
+
+export const ORDER_STATUS_COLORS = {
+  CANCELLED: 'text-red-600 bg-red-50',
+  COMPLETED: 'text-green-600 bg-green-50',
+  DELIVERED: 'text-blue-600 bg-blue-50',
+  SHIPPING: 'text-indigo-600 bg-indigo-50',
+  PENDING: 'text-gray-600 bg-gray-50',
+  PAID: 'text-gray-600 bg-gray-50',
+  PREPARING: 'text-gray-600 bg-gray-50',
+} as const;
+
+export const CANCELABLE_STATUSES = ['PENDING', 'PAID', 'PREPARING'] as const;
+export const CONFIRMABLE_STATUSES = ['DELIVERED'] as const;
+
+export const ERROR_MESSAGES = {
+  ORDER_NOT_FOUND: '주문을 찾을 수 없습니다',
+  CANCEL_FAILED: '주문 취소에 실패했습니다',
+  CONFIRM_FAILED: '구매 확정에 실패했습니다',
+} as const;
+
+export const SUCCESS_MESSAGES = {
+  ORDER_CANCELLED: '주문이 취소되었습니다',
+  ORDER_CONFIRMED: '구매가 확정되었습니다',
+} as const;
+
+## /Users/yerin/Desktop/shopping-mall/frontend/src/components/order
+
+### OrderForm.tsx
+
+import React, { useState } from 'react';
+import AddressSelect from './AddressSelect';
+import { PaymentSelect } from './PaymentSelect';
+import { PointInput } from './PointInput';
+import { PaymentType, PaymentSummary } from '../../types/payment';
+
+interface OrderFormProps {
+  summary: PaymentSummary;
+  onPaymentMethodSelect: (paymentType: PaymentType, methodId: number | null) => void;
+  onPointsUseChange: (points: number) => void;
+  onAddressSelect: (addressId: number) => void;
+}
+
+export const OrderForm: React.FC<OrderFormProps> = ({
+  summary,
+  onPaymentMethodSelect,
+  onPointsUseChange,
+  onAddressSelect
+}) => {
+  const [selectedPaymentType, setSelectedPaymentType] = useState<PaymentType | null>(null);
+  const [selectedMethodId, setSelectedMethodId] = useState<number | null>(null);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+
+  // 결제 방식 선택 핸들러
+  const handlePaymentTypeSelect = (type: PaymentType) => {
+    setSelectedPaymentType(type);
+    setSelectedMethodId(null); // 결제 방식이 변경되면 선택된 결제수단 초기화
+    onPaymentMethodSelect(type, null);
+  };
+
+  // 결제수단 선택 핸들러
+  const handleMethodSelect = (methodId: number) => {
+    setSelectedMethodId(methodId);
+    if (selectedPaymentType) {
+      onPaymentMethodSelect(selectedPaymentType, methodId);
+    }
+  };
+
+  // 주소 선택 핸들러
+  const handleAddressSelect = (addressId: number) => {
+    setSelectedAddressId(addressId);
+    onAddressSelect(addressId);
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* 배송지 선택 */}
+      <AddressSelect
+        selectedId={selectedAddressId}
+        onSelect={handleAddressSelect}
+      />
+
+      {/* 결제 수단 선택 */}
+      <PaymentSelect
+        selectedPaymentType={selectedPaymentType}
+        selectedMethodId={selectedMethodId}
+        onSelectPaymentType={handlePaymentTypeSelect}
+        onSelectMethod={handleMethodSelect}
+      />
+
+      {/* 포인트 사용 */}
+      <PointInput
+        maxPoints={10000} // TODO: 실제 사용자의 보유 포인트로 대체
+        maxAmount={summary.total}
+        onChange={onPointsUseChange}
+      />
+    </div>
+  );
+};
+
+export default OrderForm;
+
+### OrderActions.tsx
+
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Order } from '../../types/order';
+import { useOrder } from '../../hooks/useOrder';
+import { toast } from 'react-hot-toast';
+import {
+  CANCELABLE_STATUSES,
+  CONFIRMABLE_STATUSES,
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES
+} from '../../constants/order';
+
+interface OrderActionsProps {
+  order: Order;
+  onSuccess?: () => void;
+}
+
+type CancelableStatus = typeof CANCELABLE_STATUSES[number];
+type ConfirmableStatus = typeof CONFIRMABLE_STATUSES[number];
+
+const isCancelable = (status: Order['status']): status is CancelableStatus => {
+  return CANCELABLE_STATUSES.includes(status as CancelableStatus);
+};
+
+const isConfirmable = (status: Order['status']): status is ConfirmableStatus => {
+  return CONFIRMABLE_STATUSES.includes(status as ConfirmableStatus);
+};
+
+export const OrderActions: React.FC<OrderActionsProps> = ({ order, onSuccess }) => {
+  const navigate = useNavigate();
+  const { mutations: { cancelOrder, confirmOrder } } = useOrder();
+
+  const handleCancel = async () => {
+    try {
+      await cancelOrder(order.orderId);
+      toast.success(SUCCESS_MESSAGES.ORDER_CANCELLED);
+      onSuccess?.();
+    } catch (error) {
+      toast.error(ERROR_MESSAGES.CANCEL_FAILED);
+      console.error('Failed to cancel order:', error);
+    }
+  };
+
+  const handleConfirm = async () => {
+    try {
+      await confirmOrder(order.orderId);
+      toast.success(SUCCESS_MESSAGES.ORDER_CONFIRMED);
+      onSuccess?.();
+    } catch (error) {
+      toast.error(ERROR_MESSAGES.CONFIRM_FAILED);
+      console.error('Failed to confirm order:', error);
+    }
+  };
+
+  if (order.status === 'CANCELLED' || order.status === 'COMPLETED') {
+    return (
+      <div className="flex justify-center">
+        <button
+          onClick={() => navigate('/orders')}
+          className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+        >
+          목록으로 돌아가기
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex justify-center space-x-4">
+      {isCancelable(order.status) && (
+        <button
+          onClick={handleCancel}
+          className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+        >
+          주문 취소
+        </button>
+      )}
+      
+      {isConfirmable(order.status) && (
+        <button
+          onClick={handleConfirm}
+          className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+        >
+          구매 확정
+        </button>
+      )}
+
+      <button
+        onClick={() => navigate('/orders')}
+        className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+      >
+        목록으로
+      </button>
+    </div>
+  );
+};
+
+### AddressSelect.tsx
+
+import React, { useState, useEffect } from 'react';
+import { Plus } from 'lucide-react';
+import { Address } from '../../types/address';
+
+declare global {
+  interface Window {
+    daum: any;
+  }
+}
+
+interface AddressSelectProps {
+  selectedId: number | null;
+  onSelect: (id: number) => void;
+}
+
+const AddressSelect: React.FC<AddressSelectProps> = ({ selectedId, onSelect }) => {
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [newAddress, setNewAddress] = useState({
+    postalCode: '',
+    roadAddress: '',
+    detailAddress: ''
+  });
+  const [error, setError] = useState<string | null>(null);
+
+  // 저장된 주소 목록 불러오기
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const response = await fetch('/api/members/me', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('주소 목록을 불러오는데 실패했습니다.');
+        }
+
+        const data = await response.json();
+        setAddresses(data.addresses);
+      } catch (err) {
+        console.error('Error fetching addresses:', err);
+        setError(err instanceof Error ? err.message : '주소 목록을 불러오는데 실패했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAddresses();
+  }, []);
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    script.async = true;
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
+  const openPostcode = () => {
+    if (!window.daum) {
+      alert('우편번호 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    new window.daum.Postcode({
+      oncomplete: (data: any) => {
+        setNewAddress({
+          postalCode: data.zonecode,
+          roadAddress: data.roadAddress,
+          detailAddress: ''
+        });
+      }
+    }).open();
+  };
+
+  const handleSubmitNewAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAddress.roadAddress || !newAddress.postalCode) {
+      setError('주소를 입력해주세요.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/members/me/addresses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify(newAddress)
+      });
+
+      if (!response.ok) {
+        throw new Error('배송지 추가에 실패했습니다.');
+      }
+
+      const savedAddress = await response.json();
+      setAddresses(prev => [...prev, savedAddress]);
+      setShowNewForm(false);
+      setNewAddress({ postalCode: '', roadAddress: '', detailAddress: '' });
+
+      // 새로 추가된 주소를 선택 상태로 만듦
+      onSelect(savedAddress.addressId);
+    } catch (err) {
+      console.error('Error adding address:', err);
+      setError(err instanceof Error ? err.message : '배송지 추가에 실패했습니다.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="animate-pulse">
+          <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="space-y-3">
+            <div className="h-20 bg-gray-200 rounded"></div>
+            <div className="h-20 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-6">
+      <h3 className="text-lg font-semibold mb-4">배송지 선택</h3>
+      
+      {/* 기존 배송지 목록 */}
+      <div className="space-y-3 mb-4">
+        {addresses.map((addr) => (
+          <label
+            key={addr.addressId}
+            className="flex items-start p-4 border rounded-lg cursor-pointer hover:border-indigo-500 transition-colors"
+          >
+            <input
+              type="radio"
+              name="address"
+              className="mt-1"
+              checked={selectedId === addr.addressId}
+              onChange={() => onSelect(addr.addressId)}
+            />
+            <div className="ml-4">
+              <p className="font-medium">{addr.fullAddress}</p>
+              <p className="text-sm text-gray-500">
+                {addr.postalCode}
+              </p>
+            </div>
+          </label>
+        ))}
+      </div>
+
+      {/* 새 배송지 추가 버튼 */}
+      {!showNewForm && (
+        <button
+          onClick={() => setShowNewForm(true)}
+          className="flex items-center text-indigo-600 hover:text-indigo-700"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          새 배송지 추가
+        </button>
+      )}
+
+      {/* 새 배송지 입력 폼 */}
+      {showNewForm && (
+        <form onSubmit={handleSubmitNewAddress} className="mt-4 space-y-4">
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                우편번호
+              </label>
+              <input
+                type="text"
+                value={newAddress.postalCode}
+                readOnly
+                className="w-full p-2 border rounded-lg bg-gray-50"
+                placeholder="우편번호"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={openPostcode}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+            >
+              우편번호 검색
+            </button>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              도로명 주소
+            </label>
+            <input
+              type="text"
+              value={newAddress.roadAddress}
+              readOnly
+              className="w-full p-2 border rounded-lg bg-gray-50"
+              placeholder="도로명 주소"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              상세주소
+            </label>
+            <input
+              type="text"
+              value={newAddress.detailAddress}
+              onChange={(e) => setNewAddress({ ...newAddress, detailAddress: e.target.value })}
+              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+              placeholder="상세주소를 입력하세요"
+            />
+          </div>
+
+          {error && (
+            <p className="text-red-500 text-sm">{error}</p>
+          )}
+
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={() => setShowNewForm(false)}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+            >
+              취소
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+            >
+              저장
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+};
+
+export default AddressSelect;
+
+### OrderPaymentSummary.tsx
+
+import React, { useState } from 'react';
+import { loadTossPayments } from '@tosspayments/payment-sdk';
+import { PaymentType, PaymentSummary, PaymentResponse } from '../../types/payment';
+
+interface OrderPaymentSummaryProps {
+  orderId: string;
+  orderName: string;
+  summary: PaymentSummary;
+  selectedPaymentType: PaymentType | null;
+  selectedMethodId: number | null;
+  onPaymentSuccess: (paymentKey: string) => void;
+  onPaymentFail: (error: string) => void;
+}
+
+// 결제 타입별 처리 함수 타입
+type PaymentHandler = () => Promise<void>;
+
+export const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
+  orderId,
+  orderName,
+  summary,
+  selectedPaymentType,
+  selectedMethodId,
+  onPaymentSuccess,
+  onPaymentFail
+}) => {
+  const [processing, setProcessing] = useState(false);
+
+  // 토스페이먼츠 카드 결제 처리
+  const handleCardPayment: PaymentHandler = async () => {
+    try {
+      // 결제 준비 API 호출
+      const prepareResponse = await fetch(`/api/payments/prepare?orderId=${orderId}&amount=${summary.total}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          orderId,
+          amount: summary.total,
+          paymentMethodId: selectedMethodId === -1 ? null : selectedMethodId
+        })
+      });
+
+      console.log(prepareResponse.json)
+
+      if (!prepareResponse.ok) {
+        throw new Error('결제 준비에 실패했습니다.');
+      }
+
+      const { clientKey } = await prepareResponse.json();
+
+      // 토스페이먼츠 SDK 초기화
+      const tossPayments = await loadTossPayments(clientKey);
+
+      // 결제 요청
+      const paymentResult = await tossPayments.requestPayment('카드', {
+        amount: summary.total,
+        orderId: orderId,
+        orderName: orderName,
+        successUrl: `${window.location.origin}/payments/success`,
+        failUrl: `${window.location.origin}/payments/fail`,
+      }) as unknown as PaymentResponse;
+
+      // 결제 성공 처리
+      if ((paymentResult as PaymentResponse).paymentKey) {
+        onPaymentSuccess((paymentResult as PaymentResponse).paymentKey);
+      }
+    } catch (error) {
+      console.error('Card payment failed:', error);
+      onPaymentFail(error instanceof Error ? error.message : '결제 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 가상계좌 결제 처리
+  const handleVirtualAccountPayment: PaymentHandler = async () => {
+    try {
+      const response = await fetch('/api/payments/virtual-account', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          orderId,
+          amount: summary.total
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('가상계좌 발급에 실패했습니다.');
+      }
+
+      const result = await response.json();
+      onPaymentSuccess(result.paymentKey);
+    } catch (error) {
+      console.error('Virtual account payment failed:', error);
+      onPaymentFail(error instanceof Error ? error.message : '가상계좌 발급 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 일반 결제 처리
+  const handleNormalPayment: PaymentHandler = async () => {
+    try {
+      const response = await fetch('/api/payments/normal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          orderId,
+          amount: summary.total
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('결제 처리에 실패했습니다.');
+      }
+
+      const result = await response.json();
+      onPaymentSuccess(result.paymentKey);
+    } catch (error) {
+      console.error('Normal payment failed:', error);
+      onPaymentFail(error instanceof Error ? error.message : '결제 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 결제 실행
+  const handlePayment = async () => {
+    if (!selectedPaymentType) {
+      onPaymentFail('결제 방식을 선택해주세요.');
+      return;
+    }
+
+    // if (selectedPaymentType === PaymentType.CARD && selectedMethodId === null) {
+    //   onPaymentFail('결제 수단을 선택해주세요.');
+    //   return;
+    // }
+
+    setProcessing(true);
+
+    try {
+      switch (selectedPaymentType) {
+        case PaymentType.CARD:
+          await handleCardPayment();
+          break;
+        case PaymentType.VIRTUAL:
+          await handleVirtualAccountPayment();
+          break;
+        case PaymentType.NORMAL:
+          await handleNormalPayment();
+          break;
+        default:
+          throw new Error('지원하지 않는 결제 방식입니다.');
+      }
+    } catch (error) {
+      onPaymentFail(error instanceof Error ? error.message : '결제 처리 중 오류가 발생했습니다.');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  // 결제수단이 선택되지 않은 경우
+  const isPaymentDisabled = !selectedPaymentType;
+  //  || 
+  //   (selectedPaymentType === PaymentType.CARD && selectedMethodId === null);
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
+      <h3 className="text-lg font-semibold mb-4">결제 정보</h3>
+      
+      {/* 금액 정보 */}
+      <div className="space-y-3 mb-6">
+        <div className="flex justify-between text-gray-600">
+          <span>상품 금액</span>
+          <span>{summary.subtotal.toLocaleString()}원</span>
+        </div>
+        <div className="flex justify-between text-gray-600">
+          <span>배송비</span>
+          <span>{summary.shippingFee.toLocaleString()}원</span>
+        </div>
+        {summary.discount > 0 && (
+          <div className="flex justify-between text-red-500">
+            <span>할인 금액</span>
+            <span>-{summary.discount.toLocaleString()}원</span>
+          </div>
+        )}
+        {summary.pointsUsed > 0 && (
+          <div className="flex justify-between text-blue-500">
+            <span>포인트 사용</span>
+            <span>-{summary.pointsUsed.toLocaleString()}P</span>
+          </div>
+        )}
+        <div className="border-t pt-3">
+          <div className="flex justify-between font-semibold text-lg">
+            <span>최종 결제 금액</span>
+            <span>{summary.total.toLocaleString()}원</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 결제 버튼 */}
+      <button
+        onClick={handlePayment}
+        disabled={isPaymentDisabled || processing}
+        className={`w-full py-3 rounded-lg transition-colors ${
+          isPaymentDisabled
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            : processing
+            ? 'bg-indigo-400 text-white cursor-not-allowed'
+            : 'bg-indigo-600 text-white hover:bg-indigo-700'
+        }`}
+      >
+        {processing 
+          ? '결제 처리 중...' 
+          : isPaymentDisabled 
+            ? '결제수단을 선택해주세요' 
+            : '결제하기'
+        }
+      </button>
+
+      {/* 결제 금액에 대한 동의 문구 */}
+      <p className="mt-4 text-sm text-gray-500 text-center">
+        위 주문 내용을 확인하였으며,<br />
+        결제 진행에 동의합니다.
+      </p>
+    </div>
+  );
+};
+
+### OrderList.tsx
+
+import React from 'react';
+import { useOrder } from '../../hooks/useOrder';
+import { OrderCard } from './OrderCard';
+import { ShoppingBag } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+export const OrderList: React.FC = () => {
+  const navigate = useNavigate();
+  const { queries: { useOrders } } = useOrder();
+  const { data: orders, isLoading, error } = useOrders();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="animate-pulse">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div className="space-y-2">
+                  <div className="h-5 bg-gray-200 rounded w-32"></div>
+                  <div className="h-4 bg-gray-200 rounded w-24"></div>
+                </div>
+                <div className="h-6 bg-gray-200 rounded w-20"></div>
+              </div>
+              <div className="border-t border-b py-4 mb-4">
+                <div className="flex items-center">
+                  <div className="w-20 h-20 bg-gray-200 rounded"></div>
+                  <div className="ml-4 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-48"></div>
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <div className="h-6 bg-gray-200 rounded w-32"></div>
+                <div className="h-8 bg-gray-200 rounded w-24"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+        <div className="text-red-500 mb-4">
+          <ShoppingBag className="w-12 h-12 mx-auto mb-4" />
+          <h3 className="text-lg font-medium">주문 내역을 불러오는데 실패했습니다</h3>
+        </div>
+        <p className="text-gray-600 mb-4">잠시 후 다시 시도해주세요.</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="text-indigo-600 hover:text-indigo-500"
+        >
+          새로고침
+        </button>
+      </div>
+    );
+  }
+
+  if (!orders?.length) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+        <ShoppingBag className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+        <h3 className="text-lg font-medium mb-2">주문 내역이 없습니다</h3>
+        <p className="text-gray-600 mb-4">첫 주문을 시작해보세요!</p>
+        <button
+          onClick={() => navigate('/products')}
+          className="px-4 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+        >
+          쇼핑하러 가기
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {orders.map((order) => (
+        <OrderCard key={order.orderId} order={order} />
+      ))}
+    </div>
+  );
+};
+
+### PaymentSelect.tsx
+
+import React, { useEffect, useState } from 'react';
+import { CreditCard, FileText, Wallet } from 'lucide-react';
+import { PaymentMethod, PaymentType } from '../../types/payment';
+import { log } from 'console';
+
+interface PaymentSelectProps {
+  selectedPaymentType: PaymentType | null;
+  selectedMethodId: number | null;
+  onSelectPaymentType: (type: PaymentType) => void;
+  onSelectMethod: (methodId: number) => void;
+}
+
+// 결제 방식별 레이블과 아이콘 매핑
+const PAYMENT_TYPE_INFO = {
+  [PaymentType.CARD]: {
+    label: '카드결제/간편결제',
+    // icon: CreditCard,
+    description: '신용/체크카드 결제 및 간편결제'
+  },
+  [PaymentType.VIRTUAL]: {
+    label: '무통장입금',
+    // icon: FileText,
+    description: '가상계좌 발급 후 계좌이체'
+  },
+  [PaymentType.NORMAL]: {
+    label: '일반결제',
+    // icon: Wallet,
+    description: '일반 결제'
+  }
+};
+
+export const PaymentSelect: React.FC<PaymentSelectProps> = ({
+  selectedPaymentType,
+  selectedMethodId,
+  onSelectPaymentType,
+  onSelectMethod
+}) => {
+  const [savedMethods, setSavedMethods] = useState<PaymentMethod[]>([]);
+  const [loading, setLoading] = useState(false);  // 초기값을 false로 변경
+  const [error, setError] = useState<string | null>(null);
+
+  // 저장된 결제수단 조회
+  // 저장된 결제수단 조회
+useEffect(() => {
+  const fetchPaymentMethods = async () => {
+    // 카드 결제 타입이 선택된 경우에만 API 호출
+    console.log(selectedPaymentType);
+
+    if (selectedPaymentType === PaymentType.CARD) {
+      setLoading(true);
+      try {
+        // 실제 API 호출 대신 임시 데이터 사용
+        const mockData: PaymentMethod[] = [
+          {
+            paymentMethodId: 1,
+            paymentType: 'CREDIT_CARD',
+            cardNumber: '****-****-****-1234',
+            expiryDate: '12/25',
+            isDefault: true
+          },
+          {
+            paymentMethodId: 2,
+            paymentType: 'CREDIT_CARD',
+            cardNumber: '****-****-****-5678',
+            expiryDate: '06/24',
+            isDefault: false
+          }
+        ];
+        
+        setSavedMethods(mockData);
+        setLoading(false);
+
+        // 실제 API가 준비되면 아래 코드 사용
+        /*
+        const response = await fetch('/api/payment-methods', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('결제수단을 불러오는데 실패했습니다.');
+        }
+
+        const data = await response.json();
+        setSavedMethods(data);
+        */
+
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '결제수단 로딩 실패');
+        console.error('Payment methods fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setSavedMethods([]);
+      setLoading(false);
+    }
+  };
+
+  fetchPaymentMethods();
+}, [selectedPaymentType]);
+
+  // 디버깅을 위한 로그 추가
+  console.log('Payment Select State:', { 
+    loading, 
+    selectedPaymentType,
+    savedMethods,
+    error 
+  });
+
+  // 로딩 중이더라도 결제 방식 선택 UI는 보여줌
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-6">
+      <h3 className="text-lg font-semibold mb-6">결제수단 선택</h3>
+
+      {/* 결제 방식 선택 UI - 항상 표시 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {Object.values(PaymentType).map((type) => (
+          <button
+            key={type}
+            onClick={() => onSelectPaymentType(type)}
+            className={`p-4 border rounded-lg transition-all ${
+              selectedPaymentType === type
+                ? 'border-blue-500 bg-blue-50'
+                : 'border-gray-200 hover:border-blue-200'
+            }`}
+          >
+            {type === PaymentType.CARD && '카드결제'}
+            {type === PaymentType.VIRTUAL && '무통장입금'}
+            {type === PaymentType.NORMAL && '일반결제'}
+          </button>
+        ))}
+      </div>
+
+      {/* 카드 결제 수단 선택 UI - 카드 결제 선택 시에만 표시
+      {selectedPaymentType === PaymentType.CARD && (
+        <div className="mt-6">
+          {loading ? (
+            <div className="space-y-4">
+              <div className="h-20 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-20 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {savedMethods.map((method) => (
+                <button
+                  key={method.paymentMethodId}
+                  onClick={() => onSelectMethod(method.paymentMethodId)}
+                  className={`w-full p-4 border rounded-lg text-left ${
+                    selectedMethodId === method.paymentMethodId
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-blue-200'
+                  }`}
+                >
+                  <div className="font-medium">{method.cardNumber}</div>
+                  <div className="text-sm text-gray-500">
+                    유효기간: {method.expiryDate}
+                  </div>
+                </button>
+              ))}
+              
+              <button
+                onClick={() => onSelectMethod(-1)}
+                className={`w-full p-4 border rounded-lg text-left ${
+                  selectedMethodId === -1
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-blue-200'
+                }`}
+              >
+                <div className="font-medium">새 카드로 결제</div>
+              </button>
+            </div>
+          )}
+
+          {error && (
+            <div className="mt-4 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+        </div>
+      )} */}
+    </div>
+  );
+};
+
+### PointInput.tsx
+
+import React, { useState } from 'react';
+
+interface PointInputProps {
+  maxPoints: number;     // 사용 가능한 최대 포인트
+  maxAmount: number;     // 주문 금액
+  onChange: (points: number) => void;
+}
+
+export const PointInput: React.FC<PointInputProps> = ({
+  maxPoints,
+  maxAmount,
+  onChange
+}) => {
+  const [points, setPoints] = useState<number>(0);
+
+  const handlePointChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 0;
+    const validValue = Math.min(value, maxPoints, maxAmount);
+    setPoints(validValue);
+    onChange(validValue);
+  };
+
+  const handleAllPointsClick = () => {
+    const maxUsablePoints = Math.min(maxPoints, maxAmount);
+    setPoints(maxUsablePoints);
+    onChange(maxUsablePoints);
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-6">
+      <h3 className="text-lg font-semibold mb-4">포인트 사용</h3>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between text-sm text-gray-600">
+          <span>사용 가능한 포인트</span>
+          <span>{maxPoints.toLocaleString()} P</span>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <input
+            type="number"
+            value={points || ''}
+            onChange={handlePointChange}
+            min="0"
+            max={Math.min(maxPoints, maxAmount)}
+            className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="0"
+          />
+          <button
+            onClick={handleAllPointsClick}
+            className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          >
+            전액사용
+          </button>
+        </div>
+
+        {points > 0 && (
+          <div className="text-sm text-blue-600">
+            {points.toLocaleString()}P 사용 예정
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+### OrderItems.tsx
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { OrderItem } from '../../types/order';
+
+interface OrderItemsProps {
+  items: OrderItem[];
+  totalAmount: number;
+}
+
+export const OrderItems: React.FC<OrderItemsProps> = ({ items, totalAmount }) => {
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <h3 className="text-lg font-semibold mb-4">주문 상품</h3>
+      
+      <div className="space-y-4">
+        {items.map((item) => (
+          <div key={item.orderItemId} className="flex items-center py-4 border-b last:border-b-0">
+            <img
+              src="/api/placeholder/80/80"
+              alt={item.productName}
+              className="w-20 h-20 object-cover rounded"
+            />
+            <div className="ml-4 flex-grow">
+              <Link
+                to={`/products/${item.productId}`}
+                className="text-lg font-medium hover:text-indigo-600"
+              >
+                {item.productName}
+              </Link>
+              <div className="text-sm text-gray-600 mt-1">
+                {item.quantity}개
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="font-medium">
+                {item.price.toLocaleString()}원
+              </div>
+              <div className="text-sm text-gray-600 mt-1">
+                총 {item.subtotal.toLocaleString()}원
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 총 금액 */}
+      <div className="mt-6 pt-6 border-t">
+        <div className="flex justify-between items-center text-lg font-bold">
+          <span>총 결제금액</span>
+          <span>{totalAmount.toLocaleString()}원</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+### OrderInfo.tsx
+
+import React from 'react';
+import { format } from 'date-fns';
+import { Order} from '../../types/order';
+import { ORDER_STATUS_COLORS, orderStatusLabels } from '../../constants/order';
+
+interface OrderInfoProps {
+  order: Order;
+}
+
+export const OrderInfo: React.FC<OrderInfoProps> = ({ order }) => {
+  const statusColor = ORDER_STATUS_COLORS[order.status];
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <span className="text-sm text-gray-500">주문번호</span>
+          <h2 className="text-xl font-bold">{order.orderNumber}</h2>
+        </div>
+        <span className={`px-4 py-2 rounded-full text-sm font-medium ${statusColor}`}>
+          {orderStatusLabels[order.status]}
+        </span>
+      </div>
+      
+      <div className="border-t pt-4">
+        <dl className="grid grid-cols-2 gap-4">
+          <div>
+            <dt className="text-sm text-gray-500">주문일시</dt>
+            <dd className="mt-1">
+              {format(new Date(order.createdAt), 'yyyy년 MM월 dd일 HH:mm')}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm text-gray-500">결제수단</dt>
+            <dd className="mt-1">{order.paymentMethod}</dd>
+          </div>
+          <div className="col-span-2">
+            <dt className="text-sm text-gray-500">배송주소</dt>
+            <dd className="mt-1">{order.deliveryAddress}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  );
+};
+
+### OrderCard.tsx
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
+import { Order } from '../../types/order';
+import { orderStatusLabels } from '../../constants/order'
+
+interface OrderCardProps {
+  order: Order;
+}
+
+export const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
+  const getStatusColor = (status: Order['status']) => {
+    switch (status) {
+      case 'CANCELLED':
+        return 'text-red-600 bg-red-50';
+      case 'COMPLETED':
+        return 'text-green-600 bg-green-50';
+      case 'DELIVERED':
+        return 'text-blue-600 bg-blue-50';
+      case 'SHIPPING':
+        return 'text-indigo-600 bg-indigo-50';
+      default:
+        return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  const mainItem = order.items[0];
+  const remainingItemsCount = order.items.length - 1;
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-lg font-semibold mb-1">{order.orderNumber}</h3>
+          <p className="text-sm text-gray-500">
+            {format(new Date(order.createdAt), 'yyyy년 MM월 dd일')}
+          </p>
+        </div>
+        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+          {orderStatusLabels[order.status]}
+        </span>
+      </div>
+
+      <div className="border-t border-b py-4 mb-4">
+        <div className="flex items-center">
+          <img
+            src="https://via.placeholder.com/100"  // 수정
+            alt={mainItem.productName}
+            className="w-20 h-20 object-cover rounded"
+          />
+          <div className="ml-4">
+            <h4 className="font-medium">{mainItem.productName}</h4>
+            <p className="text-sm text-gray-600">
+              {mainItem.quantity}개 · {mainItem.price.toLocaleString()}원
+            </p>
+            {remainingItemsCount > 0 && (
+              <p className="text-sm text-gray-500 mt-1">
+                외 {remainingItemsCount}개의 상품
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center">
+        <div>
+          <span className="text-sm text-gray-600">총 주문금액</span>
+          <span className="ml-2 text-lg font-bold">
+            {order.totalAmount.toLocaleString()}원
+          </span>
+        </div>
+        <Link
+          to={`/orders/${order.orderId}`}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+        >
+          주문 상세보기
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+## /Users/yerin/Desktop/shopping-mall/frontend/src/components/auth
+
+### LoginForm.tsx
+
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+interface LoginFormProps {
+  onSuccess: (token: string, username: string, name: string) => void;
+}
+
+const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    username: '',
+    password: ''
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Invalid credentials');
+      }
+
+      const data = await response.json();
+      onSuccess(data.token, data.username, data.name);  // 모든 필요한 데이터 전달
+      navigate('/');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-md">
+      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+            Username
+          </label>
+          <input
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="username"
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            placeholder="Username"
+            required
+          />
+        </div>
+        <div className="mb-6">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+            Password
+          </label>
+          <input
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+            id="password"
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="******************"
+            required
+          />
+        </div>
+        {error && (
+          <div className="mb-4 text-red-500 text-sm">
+            {error}
+          </div>
+        )}
+        <div className="flex items-center justify-between">
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? 'Logging in...' : 'Sign In'}
+          </button>
+          <a
+            className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+            href="/signup"
+          >
+            Sign Up
+          </a>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default LoginForm;
+
+### SignupForm.tsx
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
+import { AddressForm } from '../../types/address';
+
+interface SignupFormData {
+  username: string;
+  password: string;
+  name: string;
+  contact: string;
+  address: AddressForm;
+  paymentMethod: PaymentMethodForm;
+}
+
+interface PaymentMethodForm {
+  paymentType: string;
+  cardNumber: string;
+  expiryDate: string;
+  isDefault: boolean;
+}
+
+interface ValidationErrors {
+  username?: string;
+  password?: string;
+  name?: string;
+  contact?: string;
+  address?: {
+    address?: string;
+    city?: string;
+    postalCode?: string;
+  };
+  paymentMethod?: {
+    cardNumber?: string;
+    expiryDate?: string;
+  };
+}
+
+const SignupForm = () => {
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState<SignupFormData>({
+    username: '',
+    password: '',
+    name: '',
+    contact: '',
+    address: {
+      postalCode: '',
+      roadAddress: '',
+      detailAddress: ''
+    },
+    paymentMethod: {
+      paymentType: 'CREDIT_CARD',
+      cardNumber: '',
+      expiryDate: '',
+      isDefault: true
+    }
+  });
+
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    script.async = true;
+    document.head.appendChild(script);
+  
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
+  // 입력값 유효성 검증
+  const validateForm = (): boolean => {
+    const newErrors: ValidationErrors = {};
+
+    // 사용자명 검증
+    if (formData.username.length < 4) {
+      newErrors.username = '사용자명은 4자 이상이어야 합니다';
+    }
+
+    // 비밀번호 검증
+    if (formData.password.length < 8) {
+      newErrors.password = '비밀번호는 8자 이상이어야 합니다';
+    }
+
+    // 이름 검증
+    if (formData.name.trim() === '') {
+      newErrors.name = '이름을 입력해주세요';
+    }
+
+    // 연락처 검증
+    if (!/^\d{10,11}$/.test(formData.contact.replace(/-/g, ''))) {
+      newErrors.contact = '올바른 연락처 형식이 아닙니다';
+    }
+
+    // 카드 정보 검증
+    if (!/^\d{16}$/.test(formData.paymentMethod.cardNumber.replace(/\s/g, ''))) {
+      newErrors.paymentMethod = { ...newErrors.paymentMethod, cardNumber: '올바른 카드번호 형식이 아닙니다' };
+    }
+    if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(formData.paymentMethod.expiryDate)) {
+      newErrors.paymentMethod = { ...newErrors.paymentMethod, expiryDate: '올바른 만료일 형식이 아닙니다 (MM/YY)' };
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const openPostcode = () => {
+    if (!window.daum) {
+      alert('우편번호 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+  
+    new window.daum.Postcode({
+      oncomplete: (data: any) => {
+        setFormData(prev => ({
+          ...prev,
+          address: {
+            ...prev.address,
+            postalCode: data.zonecode,
+            roadAddress: data.roadAddress,
+            detailAddress: ''
+          }
+        }));
+      }
+    }).open();
+  };
+
+  const formatCardNumber = (value: string): string => {
+    const cleaned = value.replace(/\s/g, '');
+    const groups = cleaned.match(/.{1,4}/g) || [];
+    return groups.join(' ');
+  };
+
+  const formatExpiryDate = (value: string): string => {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length >= 2) {
+      return cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
+    }
+    return cleaned;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    if (name === 'paymentMethod.cardNumber') {
+      const formatted = formatCardNumber(value);
+      setFormData(prev => ({
+        ...prev,
+        paymentMethod: { ...prev.paymentMethod, cardNumber: formatted }
+      }));
+      return;
+    }
+
+    if (name === 'paymentMethod.expiryDate') {
+      const formatted = formatExpiryDate(value);
+      setFormData(prev => ({
+        ...prev,
+        paymentMethod: { ...prev.paymentMethod, expiryDate: formatted }
+      }));
+      return;
+    }
+
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      setFormData(prev => ({
+        ...prev,
+        [parent]: parent === 'address'
+          ? { ...prev.address, [child]: value }
+          : { ...prev.paymentMethod, [child]: value }
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+
+    // 에러 메시지 초기화
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      if (errors[parent as keyof ValidationErrors]) {
+        setErrors(prev => ({
+          ...prev,
+          [parent]: {
+            ...(prev[parent as keyof ValidationErrors] as object),
+            [child]: undefined
+          }
+        }));
+      }
+    } else if (errors[name as keyof ValidationErrors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || '회원가입에 실패했습니다');
+      }
+
+      navigate('/login', { 
+        state: { message: '회원가입이 완료되었습니다. 로그인해주세요.' }
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '오류가 발생했습니다');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-lg mx-auto">
+      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-600">
+            {error}
+          </div>
+        )}
+
+        {/* Username */}
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+            Username
+          </label>
+          <input
+            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+              errors.username ? 'border-red-500' : ''
+            }`}
+            id="username"
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
+          {errors.username && (
+            <p className="text-red-500 text-xs italic">{errors.username}</p>
+          )}
+        </div>
+
+        {/* Password */}
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+            Password
+          </label>
+          <div className="relative">
+            <input
+              className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                errors.password ? 'border-red-500' : ''
+              }`}
+              id="password"
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-2 text-gray-400 hover:text-gray-600"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+          {errors.password && (
+            <p className="text-red-500 text-xs italic">{errors.password}</p>
+          )}
+        </div>
+
+        {/* Name */}
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+            Name
+          </label>
+          <input
+            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+              errors.name ? 'border-red-500' : ''
+            }`}
+            id="name"
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+          {errors.name && (
+            <p className="text-red-500 text-xs italic">{errors.name}</p>
+          )}
+        </div>
+
+        {/* Contact */}
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="contact">
+            Contact
+          </label>
+          <input
+            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+              errors.contact ? 'border-red-500' : ''
+            }`}
+            id="contact"
+            type="tel"
+            name="contact"
+            placeholder="01012345678"
+            value={formData.contact}
+            onChange={handleChange}
+            required
+          />
+          {errors.contact && (
+            <p className="text-red-500 text-xs italic">{errors.contact}</p>
+          )}
+        </div>
+
+        {/* Address Section */}
+        <div className="mb-6">
+          <h3 className="block text-gray-700 font-bold mb-2">Address</h3>
+          <div className="space-y-4">
+            <div className="flex items-end gap-2">
+              <div className="flex-1">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  우편번호
+                </label>
+                <input
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 bg-gray-50"
+                  type="text"
+                  value={formData.address.postalCode}
+                  readOnly
+                  placeholder="우편번호"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={openPostcode}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+              >
+                우편번호 검색
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                도로명 주소
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 bg-gray-50"
+                type="text"
+                value={formData.address.roadAddress}
+                readOnly
+                placeholder="도로명 주소"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                상세주소
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+                type="text"
+                name="address.detailAddress"
+                value={formData.address.detailAddress}
+                onChange={handleChange}
+                placeholder="상세주소를 입력하세요"
+              />
+            </div>
+          </div>
+        </div>
+        {/* Payment Method Section */}
+        <div className="mb-6">
+          <h3 className="block text-gray-700 font-bold mb-2">Payment Method</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="cardNumber">
+                Card Number
+              </label>
+              <input
+                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                  errors.paymentMethod?.cardNumber ? 'border-red-500' : ''
+                }`}
+                id="cardNumber"
+                type="text"
+                name="paymentMethod.cardNumber"
+                placeholder="1234 5678 9012 3456"
+                value={formData.paymentMethod.cardNumber}
+                onChange={handleChange}
+                required
+                maxLength={19}
+              />
+              {errors.paymentMethod?.cardNumber && (
+                <p className="text-red-500 text-xs italic">{errors.paymentMethod.cardNumber}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="expiryDate">
+                Expiry Date
+              </label>
+              <input
+                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                  errors.paymentMethod?.expiryDate ? 'border-red-500' : ''
+                }`}
+                id="expiryDate"
+                type="text"
+                name="paymentMethod.expiryDate"
+                placeholder="MM/YY"
+                value={formData.paymentMethod.expiryDate}
+                onChange={handleChange}
+                required
+                maxLength={5}
+              />
+              {errors.paymentMethod?.expiryDate && (
+                <p className="text-red-500 text-xs italic">{errors.paymentMethod.expiryDate}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Submit Button and Login Link */}
+        <div className="flex items-center justify-between">
+          <button
+            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${
+              loading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? (
+              <div className="flex items-center">
+                <div className="animate-spin mr-2">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                </div>
+                Signing up...
+              </div>
+            ) : 'Sign Up'}
+          </button>
+          <Link
+            to="/login"
+            className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+          >
+            Already have an account?
+          </Link>
+        </div>
+      </form>
+    </div>
+ );
+};
+
+export default SignupForm;
+
+## /Users/yerin/Desktop/shopping-mall/frontend/src/components/layout
+
+### Footer.tsx
+
+export const Footer = () => {
+  return (
+    <footer className="bg-gray-100 mt-auto">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-4 gap-8">
+          <div>
+            <h3 className="font-bold mb-4">About Us</h3>
+            <ul className="space-y-2">
+              <li><a href="#" className="text-gray-600 hover:text-gray-900">Company</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-gray-900">Careers</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-gray-900">Contact</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-bold mb-4">Customer Service</h3>
+            <ul className="space-y-2">
+              <li><a href="#" className="text-gray-600 hover:text-gray-900">Help Center</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-gray-900">Returns</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-gray-900">Shipping Info</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-bold mb-4">Policy</h3>
+            <ul className="space-y-2">
+              <li><a href="#" className="text-gray-600 hover:text-gray-900">Privacy Policy</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-gray-900">Terms of Service</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-bold mb-4">Follow Us</h3>
+            <ul className="space-y-2">
+              <li><a href="#" className="text-gray-600 hover:text-gray-900">Facebook</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-gray-900">Instagram</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-gray-900">Twitter</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="mt-8 pt-8 border-t text-center text-gray-600">
+          © 2024 Shop. All rights reserved.
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+
+### Layout.tsx
+
+import React from 'react';
+import { Header } from './Header';
+import { Footer } from './Footer';
+
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+export const Layout = ({ children }: LayoutProps) => {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-grow">
+        {children}
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default Layout;
+
+### Header.tsx
+
+import React from 'react';
+import { Search, ShoppingCart, Heart, User, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+
+export const Header = () => {
+  const { isAuthenticated, username, logout } = useAuth();
+
+  return (
+    <header className="w-full bg-white shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
+          <Link to="/" className="text-2xl font-bold">Ubu the Bear</Link>
+          
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <input 
+                type="text"
+                placeholder="Search products..."
+                className="w-64 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <Search className="absolute right-3 top-2.5 text-gray-400 w-5 h-5" />
+            </div>
+            
+            <nav className="flex items-center space-x-6">
+              <Link to="/cart" className="flex items-center text-gray-700 hover:text-blue-600">
+                <ShoppingCart className="w-6 h-6" />
+              </Link>
+              <Link to="/wishlist" className="flex items-center text-gray-700 hover:text-blue-600">
+                <Heart className="w-6 h-6" />
+              </Link>
+              
+              {isAuthenticated ? (
+                <div className="flex items-center space-x-4">
+                  <span className="text-gray-700">{username}</span>
+                  <button
+                    onClick={logout}
+                    className="flex items-center text-gray-700 hover:text-blue-600"
+                  >
+                    <LogOut className="w-6 h-6" />
+                  </button>
+                </div>
+              ) : (
+                <Link to="/login" className="flex items-center text-gray-700 hover:text-blue-600">
+                  <User className="w-6 h-6" />
+                </Link>
+              )}
+            </nav>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+## /Users/yerin/Desktop/shopping-mall/frontend/src/components/product
+
+### ProductList.tsx
+
+import React, { useState, useEffect } from 'react';
+import ProductCard from './ProductCard';
+import { Product } from '../../types/product';
+
+interface ProductListProps {
+  categoryId: number | null;
+  searchQuery: string;
+  limit?: number;
+  featured?: boolean;
+  sortBy?: string;
+}
+
+const ProductList: React.FC<ProductListProps> = ({
+  categoryId,
+  searchQuery,
+  limit = 20,
+  featured = false,
+  sortBy = 'default'
+}) => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        let url = '/api/products';
+        
+        if (categoryId) {
+          url = `/api/products/category/${categoryId}`;
+        } else if (searchQuery) {
+          url = `/api/products/search?keyword=${encodeURIComponent(searchQuery)}`;
+        }
+
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        
+        const data = await response.json();
+        console.log('Fetched products:', data); // API 응답 확인
+        setProducts(data);
+      } catch (err) {
+        console.error('Error fetching products:', err); // 에러 로깅
+        setError(err instanceof Error ? err.message : 'Failed to fetch products');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [categoryId, searchQuery, limit, featured, sortBy]);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="animate-pulse">
+            <div className="bg-gray-200 h-48 rounded-lg"></div>
+            <div className="mt-4 space-y-3">
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-red-600 text-center py-4">
+        {error}
+      </div>
+    );
+  }
+
+  if (!loading && products.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        상품이 없습니다.
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {products.map((product) => (
+        <ProductCard key={product.productId} {...product} />
+      ))}
+    </div>
+  );
+};
+
+export default ProductList;
+
+### CategoryList.tsx
+
+import React, { useEffect, useState } from 'react';
+import { Category } from '../../types/product';
+
+interface CategoryListProps {
+  onCategorySelect: (categoryId: number | null) => void;
+  selectedCategoryId: number | null;
+}
+
+const CategoryList: React.FC<CategoryListProps> = ({ 
+  onCategorySelect,
+  selectedCategoryId
+}) => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (!response.ok) {
+          throw new Error('Failed to fetch categories');
+        }
+        const data = await response.json();
+        setCategories(data);
+      } catch (err) {
+        console.error('Error fetching categories:', err); // 에러 로깅
+        setError(err instanceof Error ? err.message : 'Failed to fetch categories');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="animate-pulse">
+            <div className="h-12 bg-gray-200 rounded-lg"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-red-600 text-center py-4">
+        {error}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+      <button
+        onClick={() => onCategorySelect(null)}
+        className={`px-4 py-2 rounded-lg transition-colors ${
+          selectedCategoryId === null
+            ? 'bg-indigo-600 text-white'
+            : 'bg-white text-gray-700 hover:bg-gray-50'
+        } shadow-sm`}
+      >
+        전체
+      </button>
+      
+      {categories.map((category) => (
+        <button
+          key={category.categoryId}
+          onClick={() => onCategorySelect(category.categoryId)}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            selectedCategoryId === category.categoryId
+              ? 'bg-indigo-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
+          } shadow-sm`}
+        >
+          <span className="block text-sm font-medium">{category.name}</span>
+          <span className="block text-xs mt-1">
+            {category.productCount}개
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+};
+
+export default CategoryList;
+
+### ProductCard.tsx
+
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Heart, ShoppingCart } from 'lucide-react';
+import { useCart } from '../../hooks/useCart';
+import { useWishlist } from '../../hooks/useWishlist';
+import { toast } from 'react-hot-toast';
+
+export interface ProductCardProps {
+  productId: number;
+  name: string;
+  price: number;
+  description: string;
+  stockQuantity: number;
+  categoryName: string;
+}
+
+const ProductCard: React.FC<ProductCardProps> = ({
+  productId,
+  name,
+  price,
+  description,
+  stockQuantity,
+  categoryName
+}) => {
+  const [isLiked, setIsLiked] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+  const { mutations: { addToCart } } = useCart();
+  const { mutations: { addToWishlist, removeFromWishlistByProductId, checkInWishlist } } = useWishlist();
+
+  // 상품의 위시리스트 포함 여부 확인
+  useEffect(() => {
+    const checkWishlistStatus = async () => {
+      try {
+        const isInWishlist = await checkInWishlist(productId);
+        setIsLiked(isInWishlist);
+      } catch (error) {
+        // 로그인하지 않은 상태에서는 조용히 실패
+        if (error !== '로그인이 필요합니다') {
+          console.error('Failed to check wishlist status:', error);
+        }
+      }
+    };
+    
+    checkWishlistStatus();
+  }, [productId, checkInWishlist]);
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Link 이벤트 방지
+    if (stockQuantity === 0) return;
+    
+    setLoading(true);
+    try {
+      await addToCart({
+        productId,
+        quantity: 1
+      });
+      toast.success('장바구니에 추가되었습니다');
+    } catch (error) {
+      if (error === '로그인이 필요합니다') {
+        toast.error('로그인이 필요한 서비스입니다');
+      } else {
+        toast.error('장바구니 추가에 실패했습니다');
+      }
+      console.error('Failed to add to cart:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Link 이벤트 방지
+    
+    if (wishlistLoading) return;
+    setWishlistLoading(true);
+    
+    try {
+      if (isLiked) {
+        await removeFromWishlistByProductId(productId);
+        setIsLiked(false);
+        toast.success('위시리스트에서 삭제되었습니다');
+      } else {
+        await addToWishlist(productId);
+        setIsLiked(true);
+        toast.success('위시리스트에 추가되었습니다');
+      }
+    } catch (error) {
+      if (error === '로그인이 필요합니다') {
+        toast.error('로그인이 필요한 서비스입니다');
+      } else {
+        toast.error('위시리스트 처리 중 오류가 발생했습니다');
+      }
+      console.error('Failed to toggle wishlist:', error);
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
+  return (
+    <Link
+      to={`/products/${productId}`}
+      className="group block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+    >
+      <div className="relative">
+        <img
+          src="/api/placeholder/400/300"
+          alt={name}
+          className="w-full h-48 object-cover"
+          loading="lazy"
+        />
+        {stockQuantity === 0 && (
+          <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+            <span className="text-white font-bold">품절</span>
+          </div>
+        )}
+        <button
+          onClick={toggleWishlist}
+          disabled={wishlistLoading}
+          className={`absolute top-2 right-2 p-2 rounded-full ${
+            isLiked ? 'bg-red-500 text-white' : 'bg-white text-gray-500'
+          } hover:scale-110 transition-transform ${
+            wishlistLoading ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+        >
+          <Heart 
+            className={`w-5 h-5 ${wishlistLoading ? 'animate-pulse' : ''}`} 
+            fill={isLiked ? 'currentColor' : 'none'} 
+          />
+        </button>
+      </div>
+
+      <div className="p-4">
+        <div className="mb-1 text-sm text-gray-500">{categoryName}</div>
+        <h3 className="text-lg font-medium text-gray-900 truncate">{name}</h3>
+        <p className="mt-1 text-gray-500 text-sm line-clamp-2">{description}</p>
+        <div className="mt-2 flex items-center justify-between">
+          <span className="text-lg font-bold text-gray-900">
+            {price.toLocaleString()}원
+          </span>
+          <button
+            onClick={handleAddToCart}
+            disabled={loading || stockQuantity === 0}
+            className={`p-2 rounded-lg ${
+              stockQuantity === 0
+                ? 'bg-gray-200 cursor-not-allowed'
+                : loading
+                ? 'bg-indigo-400 cursor-not-allowed'
+                : 'bg-indigo-600 hover:bg-indigo-700'
+            } text-white transition-colors`}
+          >
+            <ShoppingCart className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+export default ProductCard;
+
+### ProductDetail.tsx
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import { Heart, ShoppingCart, Truck } from 'lucide-react';
+import { useCart } from '../../hooks/useCart';
+import { useWishlist } from '../../hooks/useWishlist';
+import { Product } from '../../types/product';
+
+interface ProductDetail {
+  productDetailId: number;
+  content: string;
+  imageUrls: string[];
+  manufacturer: string;
+  origin: string;
+  material: string;
+  size: string;
+  weight: string;
+  viewCount: number;
+}
+
+const ProductDetail = () => {
+  const { id } = useParams();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [detail, setDetail] = useState<ProductDetail | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
+  const [selectedImage, setSelectedImage] = useState<string>('');
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  const { mutations: { addToCart } } = useCart();
+  const { mutations: { addToWishlist, removeFromWishlistByProductId, checkInWishlist } } = useWishlist();
+
+  // 위시리스트 상태 확인
+  const checkWishlistStatus = useCallback(async () => {
+    if (!id) return;
+    
+    try {
+      const status = await checkInWishlist(parseInt(id));
+      setIsInWishlist(status);
+    } catch (error) {
+      // 로그인하지 않은 상태에서는 조용히 실패
+      if (error !== '로그인이 필요합니다') {
+        console.error('Failed to check wishlist status:', error);
+      }
+    }
+  }, [id, checkInWishlist]);
+
+  useEffect(() => {
+    checkWishlistStatus();
+  }, [checkWishlistStatus]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [productRes, detailRes] = await Promise.all([
+          fetch(`/api/products/${id}`),
+          fetch(`/api/products/${id}/detail`)
+        ]);
+
+        if (!productRes.ok || !detailRes.ok) {
+          throw new Error('Failed to fetch product data');
+        }
+
+        const productData = await productRes.json();
+        const detailData = await detailRes.json();
+
+        setProduct(productData);
+        setDetail(detailData);
+        if (detailData.imageUrls && detailData.imageUrls.length > 0) {
+          setSelectedImage(detailData.imageUrls[0]);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setQuantity(parseInt(e.target.value));
+  };
+
+  const handleAddToCart = async () => {
+    if (!product || addingToCart) return;
+    
+    setAddingToCart(true);
+    try {
+      await addToCart({
+        productId: product.productId,
+        quantity: quantity
+      });
+      toast.success('장바구니에 추가되었습니다');
+    } catch (error) {
+      if (error === '로그인이 필요합니다') {
+        toast.error('로그인이 필요한 서비스입니다');
+      } else {
+        toast.error('장바구니 추가에 실패했습니다');
+      }
+      console.error('Failed to add to cart:', error);
+    } finally {
+      setAddingToCart(false);
+    }
+  };
+
+  const toggleWishlist = async () => {
+    if (wishlistLoading || !id) return;
+    
+    setWishlistLoading(true);
+    try {
+      if (isInWishlist) {
+        await removeFromWishlistByProductId(parseInt(id));
+        setIsInWishlist(false);
+        toast.success('위시리스트에서 삭제되었습니다');
+      } else {
+        await addToWishlist(parseInt(id));
+        setIsInWishlist(true);
+        toast.success('위시리스트에 추가되었습니다');
+      }
+    } catch (error) {
+      if (error === '로그인이 필요합니다') {
+        toast.error('로그인이 필요한 서비스입니다');
+      } else {
+        toast.error('위시리스트 처리 중 오류가 발생했습니다');
+      }
+      console.error('Failed to toggle wishlist:', error);
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
+  const tabs = [
+    { title: '상품 설명', content: () => (
+      <div dangerouslySetInnerHTML={{ __html: detail?.content || '' }} />
+    )},
+    { title: '상세 정보', content: () => (
+      <dl className="space-y-4">
+        <div className="flex">
+          <dt className="w-24 font-medium">제조사</dt>
+          <dd>{detail?.manufacturer}</dd>
+        </div>
+        <div className="flex">
+          <dt className="w-24 font-medium">원산지</dt>
+          <dd>{detail?.origin}</dd>
+        </div>
+        <div className="flex">
+          <dt className="w-24 font-medium">소재</dt>
+          <dd>{detail?.material}</dd>
+        </div>
+        <div className="flex">
+          <dt className="w-24 font-medium">크기</dt>
+          <dd>{detail?.size}</dd>
+        </div>
+        <div className="flex">
+          <dt className="w-24 font-medium">무게</dt>
+          <dd>{detail?.weight}</dd>
+        </div>
+      </dl>
+    )},
+    { title: '배송/반품 안내', content: () => (
+      <div className="space-y-4">
+        <div className="flex items-center space-x-2 text-gray-600">
+          <Truck className="w-5 h-5" />
+          <span>배송 관련 안내사항...</span>
+        </div>
+      </div>
+    )}
+  ];
+
+  if (loading) {
+    return (
+      <div className="animate-pulse">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-gray-200 w-full h-96 rounded-lg"></div>
+            <div className="space-y-4">
+              <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-32 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product || !detail) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center text-red-600">
+          {error || 'Product not found'}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* 상품 이미지 섹션 */}
+        <div>
+          <img
+            src={selectedImage || '/api/placeholder/600/600'}
+            alt={product.name}
+            className="w-full h-auto rounded-lg shadow-lg"
+          />
+          <div className="grid grid-cols-4 gap-2 mt-4">
+            {detail.imageUrls.map((url, index) => (
+              <img
+                key={index}
+                src={url}
+                alt={`${product.name} ${index + 1}`}
+                className={`w-full h-24 object-cover rounded-lg cursor-pointer ${
+                  selectedImage === url ? 'ring-2 ring-indigo-500' : ''
+                }`}
+                onClick={() => setSelectedImage(url)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* 상품 정보 섹션 */}
+        <div className="space-y-6">
+          <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
+          <p className="text-2xl font-semibold text-gray-900">
+            {product.price.toLocaleString()}원
+          </p>
+          
+          <div className="space-y-4">
+            <div className="flex items-center space-x-4">
+              <label htmlFor="quantity" className="text-gray-700">수량</label>
+              <select
+                id="quantity"
+                value={quantity}
+                onChange={handleQuantityChange}
+                className="border rounded-md py-2 px-4"
+                disabled={product.stockQuantity === 0}
+              >
+                {[...Array(Math.min(10, product.stockQuantity))].map((_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    {i + 1}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex space-x-4">
+              <button
+                onClick={handleAddToCart}
+                disabled={addingToCart || product.stockQuantity === 0}
+                className={`flex-1 px-6 py-3 rounded-lg flex items-center justify-center space-x-2 ${
+                  product.stockQuantity === 0
+                    ? 'bg-gray-300 cursor-not-allowed'
+                    : addingToCart
+                    ? 'bg-indigo-400 cursor-not-allowed'
+                    : 'bg-indigo-600 hover:bg-indigo-700'
+                } text-white transition-colors`}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                <span>
+                  {product.stockQuantity === 0
+                    ? '품절'
+                    : addingToCart
+                    ? '담는 중...'
+                    : '장바구니 담기'}
+                </span>
+              </button>
+              <button
+                onClick={toggleWishlist}
+                disabled={wishlistLoading}
+                className={`px-6 py-3 rounded-lg transition-colors ${
+                  isInWishlist 
+                    ? 'bg-red-500 text-white border-red-500 hover:bg-red-600' 
+                    : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Heart 
+                  className={`w-5 h-5 ${wishlistLoading ? 'animate-pulse' : ''}`}
+                  fill={isInWishlist ? 'currentColor' : 'none'} 
+                />
+              </button>
+            </div>
+
+            {/* 재고 상태 표시 */}
+            <div className="text-sm">
+              {product.stockQuantity > 0 ? (
+                <span className="text-green-600">
+                  재고 {product.stockQuantity}개 남음
+                </span>
+              ) : (
+                <span className="text-red-600">품절</span>
+              )}
+            </div>
+          </div>
+
+          {/* 상세 정보 탭 */}
+          <div className="mt-8">
+            <div className="flex border-b">
+              {tabs.map((tab, index) => (
+                <button
+                  key={index}
+                  className={`px-4 py-2 ${
+                    activeTab === index
+                      ? 'border-b-2 border-indigo-500 text-indigo-600'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                  onClick={() => setActiveTab(index)}
+                >
+                  {tab.title}
+                </button>
+              ))}
+            </div>
+            <div className="py-4">
+              {tabs[activeTab].content()}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProductDetail;
+
+## /Users/yerin/Desktop/shopping-mall/frontend/src/components/cart
+
+### CartSkeleton.tsx
+
+import React from 'react';
+
+const CartSkeleton: React.FC = () => {
+  return (
+    <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="animate-pulse">
+        <div className="hidden lg:grid lg:grid-cols-6 gap-4 p-4 border-b">
+          <div className="h-4 bg-gray-200 rounded col-span-2"></div>
+          <div className="h-4 bg-gray-200 rounded"></div>
+          <div className="h-4 bg-gray-200 rounded"></div>
+          <div className="h-4 bg-gray-200 rounded"></div>
+          <div className="h-4 bg-gray-200 rounded"></div>
+        </div>
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="p-4 border-b">
+            <div className="lg:grid lg:grid-cols-6 gap-4">
+              <div className="col-span-2 flex items-center space-x-4">
+                <div className="w-20 h-20 bg-gray-200 rounded"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-8 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default CartSkeleton;
+
+### CartItem.tsx
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { X } from 'lucide-react';
+import { CartItem as CartItemType } from '../../types/cart';
+import QuantityInput from './QuantityInput';
+
+interface CartItemProps {
+  item: CartItemType;
+  onUpdateQuantity: (cartId: number, quantity: number) => void;
+  onRemove: (cartId: number) => void;
+}
+
+const CartItem: React.FC<CartItemProps> = ({
+  item,
+  onUpdateQuantity,
+  onRemove,
+}) => {
+  return (
+    <div className="p-4">
+      <div className="lg:grid lg:grid-cols-6 gap-4 items-center">
+        <div className="col-span-2 flex items-center">
+          <img
+            src={`/api/placeholder/100/100`}
+            alt={item.productName}
+            className="w-20 h-20 object-cover rounded"
+          />
+          <div className="ml-4">
+            <Link
+              to={`/products/${item.productId}`}
+              className="text-lg font-medium hover:text-indigo-600"
+            >
+              {item.productName}
+            </Link>
+          </div>
+        </div>
+        <div className="mt-4 lg:mt-0">
+          {item.price.toLocaleString()}원
+        </div>
+        <div className="mt-4 lg:mt-0">
+          <QuantityInput
+            value={item.quantity}
+            onChange={(quantity) => onUpdateQuantity(item.cartId, quantity)}
+          />
+        </div>
+        <div className="mt-4 lg:mt-0 font-medium">
+          {item.totalPrice.toLocaleString()}원
+        </div>
+        <div className="mt-4 lg:mt-0">
+          <button
+            onClick={() => onRemove(item.cartId)}
+            className="p-2 hover:bg-gray-100 rounded-full"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CartItem;
+
+### CartSummary.tsx
+
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { CartItem } from '../../types/cart';
+
+interface CartSummaryProps {
+  items: CartItem[];
+  onClearCart: () => void;
+}
+
+const SHIPPING_FEE = 3000;
+const FREE_SHIPPING_THRESHOLD = 50000;
+
+const CartSummary: React.FC<CartSummaryProps> = ({ items, onClearCart }) => {
+  const navigate = useNavigate();
+  
+  const subtotal = items?.reduce((sum, item) => sum + item.totalPrice, 0) || 0;
+  const shippingFee = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+  const total = subtotal + shippingFee;
+
+  const handleOrderClick = () => {
+    // 장바구니가 비어있는 경우 처리
+    if (!items?.length) {
+      alert('장바구니에 상품을 담아주세요.');
+      return;
+    }
+
+    // 주문 생성 페이지로 이동하면서 장바구니 데이터 전달
+    navigate('/orders/new', {
+      state: {
+        cartItems: items,
+        summary: {
+          subtotal,
+          shippingFee,
+          total
+        }
+      }
+    });
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <h2 className="text-lg font-semibold mb-4">주문 요약</h2>
+      <div className="space-y-4">
+        <div className="flex justify-between">
+          <span className="text-gray-600">상품 금액</span>
+          <span>{subtotal.toLocaleString()}원</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-600">배송비</span>
+          <span>{shippingFee.toLocaleString()}원</span>
+        </div>
+        {subtotal < FREE_SHIPPING_THRESHOLD && (
+          <div className="text-sm text-gray-500">
+            {FREE_SHIPPING_THRESHOLD.toLocaleString()}원 이상 구매 시 무료 배송
+          </div>
+        )}
+        <div className="border-t pt-4">
+          <div className="flex justify-between font-semibold">
+            <span>총 결제금액</span>
+            <span>{total.toLocaleString()}원</span>
+          </div>
+        </div>
+        <button
+          onClick={handleOrderClick}
+          className="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+        >
+          주문하기
+        </button>
+        <button
+          onClick={onClearCart}
+          className="w-full py-3 text-gray-600 hover:text-gray-800"
+        >
+          장바구니 비우기
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default CartSummary;
+
+### CartList.tsx
+
+import React from 'react';
+import CartItem from './CartItem';
+import CartSkeleton from './CartSkeleton';
+import { CartItem as CartItemType } from '../../types/cart';
+
+interface CartListProps {
+  items: CartItemType[];
+  isLoading: boolean;
+  onUpdateQuantity: (cartId: number, quantity: number) => void;
+  onRemove: (cartId: number) => void;
+}
+
+const CartList: React.FC<CartListProps> = ({ 
+  items, 
+  isLoading, 
+  onUpdateQuantity,
+  onRemove 
+}) => {
+  if (isLoading) {
+    return <CartSkeleton />;
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="hidden lg:grid lg:grid-cols-6 gap-4 p-4 border-b text-sm font-medium text-gray-500">
+        <div className="col-span-2">상품정보</div>
+        <div>가격</div>
+        <div>수량</div>
+        <div>총 금액</div>
+        <div>삭제</div>
+      </div>
+      <div className="divide-y">
+        {items.map((item) => (
+          <CartItem 
+            key={item.cartId} 
+            item={item}
+            onUpdateQuantity={onUpdateQuantity}
+            onRemove={onRemove}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default CartList;
+
+### QuantityInput.tsx
+
+import React, { useState, useEffect } from 'react';
+import { Minus, Plus } from 'lucide-react';
+
+interface QuantityInputProps {
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  max?: number;
+}
+
+const QuantityInput: React.FC<QuantityInputProps> = ({
+  value,
+  onChange,
+  min = 1,
+  max = 99
+}) => {
+  const [localValue, setLocalValue] = useState(value);
+
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  const handleDecrease = () => {
+    if (localValue > min) {
+      const newValue = localValue - 1;
+      setLocalValue(newValue);
+      onChange(newValue);
+    }
+  };
+
+  const handleIncrease = () => {
+    if (localValue < max) {
+      const newValue = localValue + 1;
+      setLocalValue(newValue);
+      onChange(newValue);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = parseInt(e.target.value) || min;
+    if (newValue >= min && newValue <= max) {
+      setLocalValue(newValue);
+      onChange(newValue);
+    }
+  };
+
+  return (
+    <div className="flex items-center">
+      <button
+        onClick={handleDecrease}
+        className="p-2 hover:bg-gray-100 rounded-full"
+        disabled={localValue <= min}
+      >
+        <Minus className="w-4 h-4" />
+      </button>
+      <input
+        type="number"
+        value={localValue}
+        onChange={handleInputChange}
+        min={min}
+        max={max}
+        className="w-16 text-center border-gray-200 rounded-lg mx-2"
+      />
+      <button
+        onClick={handleIncrease}
+        className="p-2 hover:bg-gray-100 rounded-full"
+        disabled={localValue >= max}
+      >
+        <Plus className="w-4 h-4" />
+      </button>
+    </div>
+  );
+};
+
+export default QuantityInput;
+
+### EmptyCart.tsx
+
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ShoppingBag } from 'lucide-react';
+
+const EmptyCart: React.FC = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-lg shadow p-8">
+      <ShoppingBag className="w-16 h-16 text-gray-400 mb-4" />
+      <h2 className="text-xl font-semibold mb-2">장바구니가 비어있습니다</h2>
+      <p className="text-gray-600 mb-4">원하는 상품을 장바구니에 담아보세요!</p>
+      <button
+        onClick={() => navigate('/')}
+        className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+      >
+        쇼핑 계속하기
+      </button>
+    </div>
+  );
+};
+
+export default EmptyCart;
+
+## /Users/yerin/Desktop/shopping-mall/frontend/src/components/wishlist
+
+### WishlistItem.tsx
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Trash2, ShoppingCart } from 'lucide-react';
+import { WishlistItem as WishlistItemType } from '../../types/wishlist';
+import { useCart } from '../../hooks/useCart';
+import { toast } from 'react-hot-toast';
+
+interface WishlistItemProps {
+  item: WishlistItemType;
+  onRemove: (wishlistId: number) => void;
+}
+
+const WishlistItem: React.FC<WishlistItemProps> = ({ item, onRemove }) => {
+  const { mutations: { addToCart } } = useCart();
+  const [loading, setLoading] = React.useState(false);
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await addToCart({
+        productId: item.productId,
+        quantity: 1
+      });
+      toast.success('장바구니에 추가되었습니다');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '장바구니 추가 실패');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemove = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      await onRemove(item.wishlistId);
+      toast.success('위시리스트에서 삭제되었습니다');
+    } catch (error) {
+      toast.error('삭제에 실패했습니다');
+    }
+  };
+
+  return (
+    <Link
+      to={`/products/${item.productId}`}
+      className="group block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+    >
+      <div className="p-4">
+        <div className="flex items-center gap-4">
+          <img
+            src={`/api/placeholder/100/100`}
+            alt={item.productName}
+            className="w-20 h-20 object-cover rounded"
+          />
+          <div className="flex-1">
+            <h3 className="text-lg font-medium text-gray-900">
+              {item.productName}
+            </h3>
+            <p className="text-gray-600 mt-1">
+              {item.price.toLocaleString()}원
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleAddToCart}
+              disabled={loading}
+              className={`p-2 rounded-full ${
+                loading ? 'bg-gray-100' : 'hover:bg-gray-100'
+              } transition-colors`}
+            >
+              <ShoppingCart className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleRemove}
+              className="p-2 hover:bg-gray-100 rounded-full text-red-500"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+export default WishlistItem;
+
+### WishlistSkeleton.tsx
+
+import React from 'react';
+
+const WishlistSkeleton: React.FC = () => {
+  return (
+    <div className="space-y-4">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="bg-white rounded-lg shadow-sm p-4">
+          <div className="animate-pulse flex items-center gap-4">
+            <div className="bg-gray-200 w-20 h-20 rounded"></div>
+            <div className="flex-1">
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+              <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default WishlistSkeleton;
+
+### EmptyWishlist.tsx
+
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Heart } from 'lucide-react';
+
+const EmptyWishlist: React.FC = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-lg shadow p-8">
+      <Heart className="w-16 h-16 text-gray-400 mb-4" />
+      <h2 className="text-xl font-semibold mb-2">위시리스트가 비어있습니다</h2>
+      <p className="text-gray-600 mb-4">마음에 드는 상품을 위시리스트에 담아보세요!</p>
+      <button
+        onClick={() => navigate('/')}
+        className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+      >
+        쇼핑 계속하기
+      </button>
+    </div>
+  );
+};
+
+export default EmptyWishlist;
+
+### WishlistList.tsx
+
+import React from 'react';
+import WishlistItem from './WishlistItem';
+import WishlistSkeleton from './WishlistSkeleton';
+import EmptyWishlist from './EmptyWishlist';
+import { WishlistItem as WishlistItemType } from '../../types/wishlist';
+
+interface WishlistListProps {
+  items: WishlistItemType[];
+  isLoading: boolean;
+  onRemove: (wishlistId: number) => void;
+}
+
+const WishlistList: React.FC<WishlistListProps> = ({
+  items,
+  isLoading,
+  onRemove
+}) => {
+  if (isLoading) {
+    return <WishlistSkeleton />;
+  }
+
+  if (!items.length) {
+    return <EmptyWishlist />;
+  }
+
+  return (
+    <div className="space-y-4">
+      {items.map((item) => (
+        <WishlistItem
+          key={item.wishlistId}
+          item={item}
+          onRemove={onRemove}
+        />
+      ))}
+    </div>
+  );
+};
+
+export default WishlistList;
+
+## /Users/yerin/Desktop/shopping-mall/frontend/src/hooks
+
+### useWishlist.ts
+
+import { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '../contexts/AuthContext';
+import { WishlistItem } from '../types/wishlist';
+import { useNavigate } from 'react-router-dom';
+
+const WISHLIST_QUERY_KEY = ['wishlist'] as const;
+
+// Auth header helper
+const getAuthHeader = () => {
+  const token = localStorage.getItem('auth_token');
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+};
+
+// API functions
+const fetchWishlist = async (): Promise<WishlistItem[]> => {
+  const response = await fetch('/api/wishlist', {
+    headers: getAuthHeader()
+  });
+  if (!response.ok) {
+    throw new Error('위시리스트를 불러오는데 실패했습니다');
+  }
+  return response.json();
+};
+
+const addToWishlist = async (productId: number): Promise<WishlistItem> => {
+  const response = await fetch(`/api/wishlist/${productId}`, {
+    method: 'POST',
+    headers: getAuthHeader(),
+  });
+  if (!response.ok) {
+    throw new Error('위시리스트에 추가하지 못했습니다');
+  }
+  return response.json();
+};
+
+const removeFromWishlist = async (wishlistId: number): Promise<void> => {
+  const response = await fetch(`/api/wishlist/${wishlistId}`, {
+    method: 'DELETE',
+    headers: getAuthHeader()
+  });
+  if (!response.ok) {
+    throw new Error('위시리스트에서 삭제하지 못했습니다');
+  }
+};
+
+const checkInWishlist = async (productId: number): Promise<boolean> => {
+  const response = await fetch(`/api/wishlist/${productId}/exists`, {
+    headers: getAuthHeader()
+  });
+  if (!response.ok) {
+    throw new Error('위시리스트 확인에 실패했습니다');
+  }
+  return response.json();
+};
+
+// Custom hook
+export const useWishlist = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // Check authentication
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Query for fetching wishlist items
+  const { data, isLoading, error } = useQuery({
+    queryKey: WISHLIST_QUERY_KEY,
+    queryFn: fetchWishlist,
+    staleTime: 1000 * 60, // 1 minute
+    enabled: isAuthenticated,
+  });
+
+  // Mutations
+  const addMutation = useMutation({
+    mutationFn: addToWishlist,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: WISHLIST_QUERY_KEY });
+    },
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: removeFromWishlist,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: WISHLIST_QUERY_KEY });
+    },
+  });
+
+  const checkMutation = useMutation({
+    mutationFn: checkInWishlist,
+  });
+
+  // productId로 wishlistId를 찾아서 삭제하는 기능 추가
+  const removeFromWishlistByProductId = async (productId: number): Promise<void> => {
+    // 1. 현재 위시리스트 목록을 조회
+    const response = await fetch('/api/wishlist', {
+      headers: getAuthHeader()
+    });
+    if (!response.ok) {
+      throw new Error('위시리스트 조회에 실패했습니다');
+    }
+    const wishlist = await response.json();
+    
+    // 2. productId에 해당하는 wishlistId 찾기
+    const item = wishlist.find((item: WishlistItem) => item.productId === productId);
+    if (!item) {
+      throw new Error('위시리스트 항목을 찾을 수 없습니다');
+    }
+
+    // 3. wishlistId로 삭제 실행
+    const deleteResponse = await fetch(`/api/wishlist/${item.wishlistId}`, {
+      method: 'DELETE',
+      headers: getAuthHeader()
+    });
+    if (!deleteResponse.ok) {
+      throw new Error('위시리스트 삭제에 실패했습니다');
+    }
+  };
+
+  return {
+    data: data ?? [],
+    isLoading,
+    error,
+    mutations: {
+      addToWishlist: isAuthenticated 
+        ? addMutation.mutateAsync 
+        : () => Promise.reject('로그인이 필요합니다'),
+      removeFromWishlist: isAuthenticated 
+        ? removeMutation.mutateAsync 
+        : () => Promise.reject('로그인이 필요합니다'),
+      removeFromWishlistByProductId: isAuthenticated
+        ? async (productId: number) => {
+            await removeFromWishlistByProductId(productId);
+            queryClient.invalidateQueries({ queryKey: WISHLIST_QUERY_KEY });
+          }
+        : () => Promise.reject('로그인이 필요합니다'),
+      checkInWishlist: isAuthenticated 
+        ? checkMutation.mutateAsync 
+        : () => Promise.reject('로그인이 필요합니다'),
+    },
+  };
+};
+
+### useCart.ts
+
+import { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '../contexts/AuthContext';
+import { CartItem } from '../types/cart';
+import { useNavigate } from 'react-router-dom';
+
+const CART_QUERY_KEY = ['cart'] as const;
+
+// Auth header helper
+const getAuthHeader = () => {
+  const token = localStorage.getItem('auth_token');
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+};
+
+// API functions
+const fetchCart = async (): Promise<CartItem[]> => {
+  const response = await fetch('/api/cart', {
+    headers: getAuthHeader()
+  });
+  if (!response.ok) {
+    throw new Error('장바구니를 불러오는데 실패했습니다');
+  }
+  return response.json();
+};
+
+const addToCart = async ({ productId, quantity }: { 
+  productId: number; 
+  quantity: number;
+}) => {
+  const response = await fetch('/api/cart', {
+    method: 'POST',
+    headers: getAuthHeader(),
+    body: JSON.stringify({ productId, quantity }),
+  });
+  if (!response.ok) {
+    throw new Error('상품을 장바구니에 담지 못했습니다');
+  }
+  return response.json();
+};
+
+const updateCartItem = async ({ cartId, quantity }: { 
+  cartId: number; 
+  quantity: number;
+}): Promise<void> => {
+  const response = await fetch(`/api/cart/${cartId}?quantity=${quantity}`, {
+    method: 'PUT',
+    headers: getAuthHeader()
+  });
+  if (!response.ok) {
+    throw new Error('수량 변경에 실패했습니다');
+  }
+};
+
+const removeCartItem = async (cartId: number): Promise<void> => {
+  const response = await fetch(`/api/cart/${cartId}`, {
+    method: 'DELETE',
+    headers: getAuthHeader()
+  });
+  if (!response.ok) {
+    throw new Error('상품 삭제에 실패했습니다');
+  }
+};
+
+const clearCart = async (): Promise<void> => {
+  const response = await fetch('/api/cart', {
+    method: 'DELETE',
+    headers: getAuthHeader()
+  });
+  if (!response.ok) {
+    throw new Error('장바구니 비우기에 실패했습니다');
+  }
+};
+
+// Custom hook
+export const useCart = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // Check authentication using useEffect
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Query for fetching cart items
+  const { data, isLoading, error } = useQuery({
+    queryKey: CART_QUERY_KEY,
+    queryFn: fetchCart,
+    staleTime: 1000 * 60, // 1 minute
+    enabled: isAuthenticated, // Only fetch if authenticated
+  });
+
+  // Mutations
+  const updateQuantityMutation = useMutation({
+    mutationFn: updateCartItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+    },
+  });
+
+  const removeItemMutation = useMutation({
+    mutationFn: removeCartItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+    },
+  });
+
+  const clearCartMutation = useMutation({
+    mutationFn: clearCart,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+    },
+  });
+
+  const addToCartMutation = useMutation({
+    mutationFn: addToCart,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+    },
+  });
+
+  return {
+    data: data ?? [],
+    isLoading,
+    error,
+    mutations: {
+      addToCart: isAuthenticated ? addToCartMutation.mutateAsync : () => Promise.reject('로그인이 필요합니다'),
+      updateQuantity: isAuthenticated 
+        ? (cartId: number, quantity: number) => updateQuantityMutation.mutateAsync({ cartId, quantity })
+        : () => Promise.reject('로그인이 필요합니다'),
+      removeItem: isAuthenticated 
+        ? (cartId: number) => removeItemMutation.mutateAsync(cartId)
+        : () => Promise.reject('로그인이 필요합니다'),
+      clearCart: isAuthenticated 
+        ? () => clearCartMutation.mutateAsync()
+        : () => Promise.reject('로그인이 필요합니다'),
+    },
+  };
+};
+
+### useOrder.ts
+
+import { useQuery, useMutation, useQueryClient, UseQueryResult, UseQueryOptions } from '@tanstack/react-query';
+import { Order, CreateOrderRequest } from '../types/order';
+import { useNavigate } from 'react-router-dom';
+
+// Query keys
+export const orderKeys = {
+  all: ['orders'] as const,
+  lists: () => [...orderKeys.all, 'list'] as const,
+  detail: (orderId: number) => [...orderKeys.all, 'detail', orderId] as const,
+};
+
+// API 호출 함수들
+const fetchOrders = async (): Promise<Order[]> => {
+  const token = localStorage.getItem('auth_token');
+  if (!token) throw new Error('로그인이 필요합니다');
+
+  const response = await fetch('/api/orders', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    }
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) throw new Error('로그인이 필요합니다');
+    throw new Error('Failed to fetch orders');
+  }
+
+  return response.json();
+};
+
+const fetchOrderDetail = async (orderId: number): Promise<Order> => {
+  const token = localStorage.getItem('auth_token');
+  if (!token) throw new Error('로그인이 필요합니다');
+
+  const response = await fetch(`/api/orders/${orderId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    }
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) throw new Error('로그인이 필요합니다');
+    throw new Error('Failed to fetch order detail');
+  }
+
+  return response.json();
+};
+
+export const useOrder = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // Queries
+  const useOrders = (options?: Omit<UseQueryOptions<Order[], Error>, 'queryKey' | 'queryFn'>): UseQueryResult<Order[], Error> => {
+    return useQuery<Order[], Error>({
+      queryKey: orderKeys.lists(),
+      queryFn: fetchOrders,
+      ...options
+    });
+  };
+
+  const useOrderDetail = (
+    orderId: number,
+    options?: Omit<UseQueryOptions<Order, Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<Order, Error> => {
+    return useQuery<Order, Error>({
+      queryKey: orderKeys.detail(orderId),
+      queryFn: () => fetchOrderDetail(orderId),
+      enabled: !!orderId,
+      ...options
+    });
+  };
+
+  // Mutations
+  const createOrderMutation = useMutation<Order, Error, CreateOrderRequest>({
+    mutationFn: async (orderData) => {
+      const token = localStorage.getItem('auth_token');
+      if (!token) throw new Error('로그인이 필요합니다');
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) throw new Error('로그인이 필요합니다');
+        throw new Error('Failed to create order');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
+    },
+    onError: (error) => {
+      if (error.message === '로그인이 필요합니다') {
+        navigate('/login');
+      }
+    }
+  });
+
+  const cancelOrderMutation = useMutation<Order, Error, number>({
+    mutationFn: async (orderId) => {
+      const token = localStorage.getItem('auth_token');
+      if (!token) throw new Error('로그인이 필요합니다');
+
+      const response = await fetch(`/api/orders/${orderId}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) throw new Error('로그인이 필요합니다');
+        throw new Error('Failed to cancel order');
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.detail(data.orderId) });
+      queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
+    },
+    onError: (error) => {
+      if (error.message === '로그인이 필요합니다') {
+        navigate('/login');
+      }
+    }
+  });
+
+  const confirmOrderMutation = useMutation<Order, Error, number>({
+    mutationFn: async (orderId) => {
+      const token = localStorage.getItem('auth_token');
+      if (!token) throw new Error('로그인이 필요합니다');
+
+      const response = await fetch(`/api/orders/${orderId}/confirm`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) throw new Error('로그인이 필요합니다');
+        throw new Error('Failed to confirm order');
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.detail(data.orderId) });
+      queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
+    },
+    onError: (error) => {
+      if (error.message === '로그인이 필요합니다') {
+        navigate('/login');
+      }
+    }
+  });
+
+  return {
+    queries: {
+      useOrders,
+      useOrderDetail,
+    },
+    mutations: {
+      createOrder: createOrderMutation.mutateAsync,
+      cancelOrder: cancelOrderMutation.mutateAsync,
+      confirmOrder: confirmOrderMutation.mutateAsync,
+    },
+  };
+};
+
+## /Users/yerin/Desktop/shopping-mall/frontend/src/pages
+
+### LoginPage.tsx
+
+import React from 'react';
+import LoginForm from '../components/auth/LoginForm';
+import { useAuth } from '../contexts/AuthContext';
+
+const LoginPage: React.FC = () => {
+  const { login } = useAuth();
+  const handleLoginSuccess = (token: string, username: string) => {
+    login(token, username);
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Sign in to your account
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Or{' '}
+            <a href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
+              create a new account
+            </a>
+          </p>
+        </div>
+        <LoginForm onSuccess={handleLoginSuccess} />
+      </div>
+    </div>
+  );
+};
+
+export default LoginPage;
+
+### OrderDetailPage.tsx
+
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ChevronLeft } from 'lucide-react';
+import { useOrder } from '../hooks/useOrder';
+import { OrderInfo } from '../components/order/OrderInfo';
+import { OrderItems } from '../components/order/OrderItems';
+import { OrderActions } from '../components/order/OrderActions';
+
+const OrderDetailPage: React.FC = () => {
+  const { orderId } = useParams();
+  const navigate = useNavigate();
+  const { queries: { useOrderDetail } } = useOrder();
+  const { data: order, isLoading, error } = useOrderDetail(Number(orderId));
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8 animate-pulse">
+        <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+        <div className="space-y-6">
+          <div className="bg-white rounded-lg shadow-sm p-6 h-48"></div>
+          <div className="bg-white rounded-lg shadow-sm p-6 h-64"></div>
+          <div className="h-10 bg-gray-200 rounded w-1/3 mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !order) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-4">주문을 찾을 수 없습니다</h2>
+          <button
+            onClick={() => navigate('/orders')}
+            className="text-indigo-600 hover:text-indigo-500"
+          >
+            주문 목록으로 돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <button
+        onClick={() => navigate('/orders')}
+        className="flex items-center text-gray-600 hover:text-gray-900 mb-6"
+      >
+        <ChevronLeft className="w-5 h-5" />
+        <span>주문 목록으로</span>
+      </button>
+
+      <OrderInfo order={order} />
+      <OrderItems items={order.items} totalAmount={order.totalAmount} />
+      <OrderActions order={order} onSuccess={handleRefresh} />
+    </div>
+  );
+};
+
+export default OrderDetailPage;
+
+### CartPage.tsx
+
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import CartList from '../components/cart/CartList';
+import CartSummary from '../components/cart/CartSummary';
+import EmptyCart from '../components/cart/EmptyCart';
+import { useCart } from '../hooks/useCart';
+import { ShoppingBag } from 'lucide-react';
+
+const CartPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { 
+    data: cartItems, 
+    isLoading,
+    error,
+    mutations: {
+      updateQuantity,
+      removeItem,
+      clearCart,
+    },
+  } = useCart();
+
+  if (error instanceof Error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-lg shadow p-8">
+          <ShoppingBag className="w-16 h-16 text-red-500 mb-4" />
+          <h2 className="text-xl font-semibold mb-2">오류가 발생했습니다</h2>
+          <p className="text-gray-600 mb-4">{error.message}</p>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            쇼핑 계속하기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!cartItems?.length && !isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <EmptyCart />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-8">장바구니</h1>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <CartList 
+            items={cartItems} 
+            isLoading={isLoading}
+            onUpdateQuantity={updateQuantity}
+            onRemove={removeItem}
+          />
+        </div>
+        <div>
+          <CartSummary 
+            items={cartItems} 
+            onClearCart={clearCart}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CartPage;
+
+### PaymentFailPage.tsx
+
+import React, { useEffect } from 'react';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { XCircle, ArrowLeft } from 'lucide-react';
+
+const PaymentFailPage = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const code = searchParams.get('code');
+  const message = searchParams.get('message');
+  const orderId = searchParams.get('orderId');
+
+  // 뒤로가기 방지
+  useEffect(() => {
+    const preventGoBack = () => {
+      window.history.pushState(null, '', location.pathname);
+      navigate('/cart', { replace: true });
+    };
+
+    window.history.pushState(null, '', location.pathname);
+    window.addEventListener('popstate', preventGoBack);
+
+    return () => {
+      window.removeEventListener('popstate', preventGoBack);
+    };
+  }, [navigate, location.pathname]);
+
+  const handleRetryPayment = () => {
+    navigate('/cart', { replace: true });
+  };
+
+  const getErrorMessage = () => {
+    switch (code) {
+      case 'PAY_PROCESS_CANCELED':
+        return '결제가 취소되었습니다';
+      case 'PAY_PROCESS_ABORTED':
+        return '결제 진행 중 문제가 발생했습니다';
+      case 'INVALID_CARD_COMPANY':
+        return '지원하지 않는 카드사입니다';
+      case 'INVALID_CARD_NUMBER':
+        return '잘못된 카드 번호입니다';
+      default:
+        return message || '결제 처리 중 오류가 발생했습니다';
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 pt-16 pb-12">
+      <div className="max-w-2xl mx-auto px-4">
+        {/* 결제 실패 상태 */}
+        <div className="text-center mb-12">
+          <XCircle className="mx-auto h-16 w-16 text-red-500" />
+          <h1 className="mt-4 text-3xl font-bold text-gray-900">결제 실패</h1>
+          <p className="mt-2 text-gray-600">
+            {getErrorMessage()}
+          </p>
+        </div>
+
+        {/* 결제 실패 정보 */}
+        <div className="bg-white shadow rounded-lg p-6 mb-8">
+          <h2 className="text-lg font-semibold mb-4">오류 정보</h2>
+          <dl className="divide-y">
+            <div className="py-3 flex justify-between">
+              <dt className="text-gray-600">주문번호</dt>
+              <dd className="font-medium">{orderId}</dd>
+            </div>
+            <div className="py-3 flex justify-between">
+              <dt className="text-gray-600">오류 코드</dt>
+              <dd className="font-medium text-red-600">{code}</dd>
+            </div>
+          </dl>
+        </div>
+
+        {/* 안내 메시지 */}
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
+          <p className="text-sm text-yellow-800">
+            결제가 정상적으로 처리되지 않았습니다. 
+            잠시 후 다시 시도해주세요. 
+            문제가 지속되면 고객센터로 문의해주시기 바랍니다.
+          </p>
+        </div>
+
+        {/* 버튼 영역 */}
+        <div className="flex flex-col space-y-3">
+          <button
+            onClick={handleRetryPayment}
+            className="w-full py-3 bg-indigo-600 text-white font-medium rounded-lg 
+                     hover:bg-indigo-700 flex items-center justify-center"
+          >
+            <ArrowLeft className="h-5 w-5 mr-1" />
+            결제 다시 시도하기
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PaymentFailPage;
+
+### PaymentSuccessPage.tsx
+
+import React from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { CheckCircle2, Clock, ChevronRight } from 'lucide-react';
+
+const PaymentSuccessPage = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const orderId = searchParams.get('orderId');
+  const paymentKey = searchParams.get('paymentKey');
+  const amount = searchParams.get('amount');
+
+  const handleGoToOrderDetail = () => {
+    navigate(`/orders/${orderId}`);
+  };
+
+  const handleGoToHome = () => {
+    navigate('/');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 pt-16 pb-12">
+      <div className="max-w-2xl mx-auto px-4">
+        {/* 결제 완료 상태 */}
+        <div className="text-center mb-12">
+          <CheckCircle2 className="mx-auto h-16 w-16 text-green-500" />
+          <h1 className="mt-4 text-3xl font-bold text-gray-900">결제가 완료되었습니다</h1>
+          <p className="mt-2 text-gray-600">
+            주문하신 상품의 결제가 정상적으로 완료되었습니다
+          </p>
+        </div>
+
+        {/* 결제 정보 */}
+        <div className="bg-white shadow rounded-lg p-6 mb-6">
+          <h2 className="text-lg font-semibold mb-4">결제 정보</h2>
+          <dl className="divide-y">
+            <div className="py-3 flex justify-between">
+              <dt className="text-gray-600">주문번호</dt>
+              <dd className="font-medium">{orderId}</dd>
+            </div>
+            <div className="py-3 flex justify-between">
+              <dt className="text-gray-600">결제금액</dt>
+              <dd className="font-medium">
+                {Number(amount).toLocaleString()}원
+              </dd>
+            </div>
+            <div className="py-3 flex items-center justify-between">
+              <dt className="text-gray-600">결제상태</dt>
+              <dd className="flex items-center text-green-600">
+                <CheckCircle2 className="h-4 w-4 mr-1" />
+                결제완료
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        {/* 배송 안내 */}
+        <div className="bg-white shadow rounded-lg p-6 mb-8">
+          <h2 className="text-lg font-semibold mb-4">배송 안내</h2>
+          <div className="flex items-start space-x-3">
+            <Clock className="h-5 w-5 text-blue-500 mt-0.5" />
+            <div>
+              <p className="text-gray-600">
+                주문하신 상품은 결제 확인 후 2-3일 이내에 출고될 예정입니다.
+                배송이 시작되면 알림을 통해 안내해 드리겠습니다.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 버튼 영역 */}
+        <div className="flex flex-col space-y-3">
+          <button
+            onClick={handleGoToOrderDetail}
+            className="w-full py-3 bg-indigo-600 text-white font-medium rounded-lg 
+                     hover:bg-indigo-700 flex items-center justify-center"
+          >
+            주문 상세보기
+            <ChevronRight className="h-5 w-5 ml-1" />
+          </button>
+          <button
+            onClick={handleGoToHome}
+            className="w-full py-3 bg-white text-gray-700 font-medium rounded-lg 
+                     border border-gray-300 hover:bg-gray-50"
+          >
+            쇼핑 계속하기
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PaymentSuccessPage;
+
+### WishlistPage.tsx
+
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import WishlistList from '../components/wishlist/WishlistList';
+import { useWishlist } from '../hooks/useWishlist';
+import { Heart, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+const WishlistPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { 
+    data: wishlistItems, 
+    isLoading, 
+    error,
+    mutations: {
+      removeFromWishlist
+    }
+  } = useWishlist();
+
+  if (error instanceof Error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-lg shadow p-8">
+          <Heart className="w-16 h-16 text-red-500 mb-4" />
+          <h2 className="text-xl font-semibold mb-2">오류가 발생했습니다</h2>
+          <p className="text-gray-600 mb-4">{error.message}</p>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            쇼핑 계속하기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* 상단 네비게이션 */}
+      <nav className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center space-x-2 py-4 text-sm">
+            <Link to="/" className="text-gray-500 hover:text-gray-700">홈</Link>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+            <span className="text-gray-900">위시리스트</span>
+          </div>
+        </div>
+      </nav>
+
+      {/* 메인 컨텐츠 */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold">위시리스트</h1>
+          <span className="text-gray-500">
+            {wishlistItems.length}개의 상품
+          </span>
+        </div>
+
+        {/* 위시리스트 목록 */}
+        <WishlistList 
+          items={wishlistItems}
+          isLoading={isLoading}
+          onRemove={removeFromWishlist}
+        />
+
+        {/* 쇼핑 계속하기 버튼 */}
+        {!isLoading && wishlistItems.length > 0 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={() => navigate('/')}
+              className="px-6 py-3 bg-white text-indigo-600 rounded-lg border border-indigo-600 hover:bg-indigo-50 transition-colors"
+            >
+              쇼핑 계속하기
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default WishlistPage;
+
+### OrderCreatePage.tsx
+
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { OrderForm } from '../components/order/OrderForm';
+import { OrderItems } from '../components/order/OrderItems';
+import { OrderPaymentSummary } from '../components/order/OrderPaymentSummary';
+import { PaymentType, PaymentSummary } from '../types/payment';
+import { CartItem } from '../types/cart';
+import { OrderItem } from '../types/order';
+import { toast } from 'react-hot-toast';
+
+interface LocationState {
+  cartItems: CartItem[];
+  summary: PaymentSummary;
+}
+
+const OrderCreatePage: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { cartItems = [], summary: initialSummary } = 
+    (location.state as LocationState) || { cartItems: [], summary: { 
+      subtotal: 0, 
+      shippingFee: 0, 
+      discount: 0, 
+      pointsUsed: 0,
+      total: 0 
+    }};
+
+    const convertCartItemsToOrderItems = (cartItems: CartItem[]): OrderItem[] => {
+      return cartItems.map(item => ({
+        orderItemId: Date.now() + Math.random(), // 임시 ID 생성
+        productId: item.productId,
+        productName: item.productName,
+        quantity: item.quantity,
+        price: item.price,
+        subtotal: item.totalPrice
+      }));
+    };
+
+  // 주문 상태
+  const [orderId] = useState(`ORDER_${Date.now()}`);
+  const [selectedPaymentType, setSelectedPaymentType] = useState<PaymentType | null>(null);
+  const [selectedMethodId, setSelectedMethodId] = useState<number | null>(null);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+  const [summary, setSummary] = useState<PaymentSummary>(initialSummary);
+
+  // 장바구니에서 넘어온 데이터 검증
+  useEffect(() => {
+    if (!cartItems?.length) {
+      toast.error('잘못된 접근입니다.');
+      navigate('/cart');
+    }
+  }, [cartItems, navigate]);
+
+  // 결제수단 선택 처리
+  const handlePaymentMethodSelect = (paymentType: PaymentType, methodId: number | null) => {
+    setSelectedPaymentType(paymentType);
+    setSelectedMethodId(methodId);
+  };
+
+  // 포인트 사용 처리
+  const handlePointsUseChange = (points: number) => {
+    setSummary(prev => ({
+      ...prev,
+      pointsUsed: points,
+      total: prev.subtotal + prev.shippingFee - prev.discount - points
+    }));
+  };
+
+  // 배송지 선택 처리
+  const handleAddressSelect = (addressId: number) => {
+    setSelectedAddressId(addressId);
+  };
+
+  // 결제 성공 처리
+  const handlePaymentSuccess = async (paymentKey: string) => {
+    try {
+      // 결제 성공 후 서버에 결제 완료 처리 요청
+      const response = await fetch('/api/payments/complete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          paymentKey,
+          orderId,
+          amount: summary.total
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('결제 완료 처리에 실패했습니다.');
+      }
+
+      toast.success('결제가 완료되었습니다.');
+      navigate('/orders/complete', { 
+        state: { orderId, paymentKey } 
+      });
+    } catch (error) {
+      console.error('Payment completion failed:', error);
+      toast.error('결제 완료 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 결제 실패 처리
+  const handlePaymentFail = (error: string) => {
+    toast.error(error || '결제 처리 중 오류가 발생했습니다.');
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-8">주문/결제</h1>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          {/* 주문 상품 목록 */}
+          <OrderItems 
+            items={convertCartItemsToOrderItems(cartItems)} 
+            totalAmount={summary.total}
+          />
+
+          {/* 주문 폼 */}
+          <OrderForm
+            summary={summary}
+            onPaymentMethodSelect={handlePaymentMethodSelect}
+            onPointsUseChange={handlePointsUseChange}
+            onAddressSelect={handleAddressSelect}
+          />
+        </div>
+
+        {/* 결제 금액 및 결제하기 */}
+        <div>
+          <OrderPaymentSummary
+            orderId={orderId}
+            orderName={`${cartItems[0]?.productName} ${
+              cartItems.length > 1 ? `외 ${cartItems.length - 1}건` : ''
+            }`}
+            summary={summary}
+            selectedPaymentType={selectedPaymentType}
+            selectedMethodId={selectedMethodId}
+            onPaymentSuccess={handlePaymentSuccess}
+            onPaymentFail={handlePaymentFail}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default OrderCreatePage;
+
+### OrderListPage.tsx
+
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { OrderList } from '../components/order/OrderList';
+import { OrderStatus } from '../types/order';
+import { orderStatusLabels } from '../constants/order'
+
+const OrderListPage: React.FC = () => {
+  const [selectedStatus, setSelectedStatus] = useState<OrderStatus | 'ALL'>('ALL');
+  const navigate = useNavigate();
+
+  const statuses: (OrderStatus | 'ALL')[] = ['ALL', 'PENDING', 'PAID', 'PREPARING', 'SHIPPING', 'DELIVERED', 'COMPLETED', 'CANCELLED'];
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">주문 내역</h1>
+        <button
+          onClick={() => navigate('/cart')}
+          className="text-indigo-600 hover:text-indigo-500"
+        >
+          장바구니로 이동
+        </button>
+      </div>
+
+      {/* 상태 필터 */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        {statuses.map((status) => (
+          <button
+            key={status}
+            onClick={() => setSelectedStatus(status)}
+            className={`px-4 py-2 rounded-full whitespace-nowrap ${
+              selectedStatus === status
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            {status === 'ALL' ? '전체' : orderStatusLabels[status]}
+          </button>
+        ))}
+      </div>
+
+      {/* 주문 목록 */}
+      <OrderList />
+    </div>
+  );
+};
+
+export default OrderListPage;
+
+### ProductPage.tsx
+
+import React, { useState } from 'react';
+import { Routes, Route, useSearchParams, useNavigate } from 'react-router-dom';
+import ProductList from '../components/product/ProductList';
+import ProductDetail from '../components/product/ProductDetail';
+import CategoryList from '../components/product/CategoryList';
+
+const ProductPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  
+  // URL 쿼리 파라미터에서 카테고리 ID와 검색어를 가져옴
+  const categoryId = searchParams.get('category') ? Number(searchParams.get('category')) : null;
+  const searchQuery = searchParams.get('q') || '';
+
+  // 카테고리 선택 핸들러
+  const handleCategorySelect = (selectedCategoryId: number | null) => {
+    if (selectedCategoryId) {
+      setSearchParams({ category: selectedCategoryId.toString() });
+    } else {
+      setSearchParams({});
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <Routes>
+        <Route index element={
+          <>
+            <CategoryList 
+              onCategorySelect={handleCategorySelect}
+              selectedCategoryId={categoryId}
+            />
+            <div className="mt-8">
+              <ProductList 
+                categoryId={categoryId}
+                searchQuery={searchQuery}
+                limit={20}
+              />
+            </div>
+          </>
+        } />
+        <Route path=":id" element={<ProductDetail />} />
+      </Routes>
+    </div>
+  );
+};
+
+export default ProductPage;
+
+### SignupPage.tsx
+
+import React from 'react';
+import SignupForm from '../components/auth/SignupForm';
+
+const SignupPage: React.FC = () => {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-lg w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Create your account
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Or{' '}
+            <a href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+              sign in to your account
+            </a>
+          </p>
+        </div>
+        <SignupForm />
+      </div>
+    </div>
+  );
+};
+
+export default SignupPage;
+
+### ProductDetailPage.tsx
+
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
+import ProductDetail from '../components/product/ProductDetail';
+import ProductList from '../components/product/ProductList';
+
+interface Product {
+  productId: number;
+  name: string;
+  price: number;
+  description: string;
+  stockQuantity: number;
+  categoryName: string;
+}
+
+const ProductDetailPage = () => {
+  const { id } = useParams();
+  
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* 상단 네비게이션 */}
+      <nav className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center space-x-2 py-4 text-sm">
+            <Link to="/" className="text-gray-500 hover:text-gray-700">홈</Link>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+            <Link to="/products" className="text-gray-500 hover:text-gray-700">상품</Link>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+            <span className="text-gray-900">상품상세</span>
+          </div>
+        </div>
+      </nav>
+
+      {/* 상품 상세 정보 */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <ProductDetail />
+      </div>
+
+      {/* 추천 상품 섹션 */}
+      <section className="bg-white py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl font-bold mb-6">추천 상품</h2>
+          <ProductList 
+            categoryId={null}
+            searchQuery=""
+            limit={4}
+            featured={true}
+          />
+        </div>
+      </section>
+
+      {/* 최근 본 상품 */}
+      <section className="bg-gray-50 py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl font-bold mb-6">최근 본 상품</h2>
+          <RecentlyViewedProducts />
+        </div>
+      </section>
+    </div>
+  );
+};
+
+// 최근 본 상품 컴포넌트
+const RecentlyViewedProducts = () => {
+  const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    // 로컬 스토리지에서 최근 본 상품 정보 가져오기
+    const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+    setRecentProducts(recentlyViewed);
+  }, []);
+
+  if (recentProducts.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+      {recentProducts.map(product => (
+        <Link 
+          key={product.productId} 
+          to={`/products/${product.productId}`}
+          className="block bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow"
+        >
+          <img
+            src="/api/placeholder/200/200"
+            alt={product.name}
+            className="w-full h-32 object-cover rounded-md"
+          />
+          <h3 className="mt-2 text-sm font-medium text-gray-900 truncate">
+            {product.name}
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">
+            {product.price.toLocaleString()}원
+          </p>
+        </Link>
+      ))}
+    </div>
+  );
+};
+
+export default ProductDetailPage;
+
+### HomePage.tsx
+
+import React, { useState } from 'react';
+import { ChevronRight } from 'lucide-react';
+import CategoryList from '../components/product/CategoryList';
+import ProductList from '../components/product/ProductList';
+
+const HomePage = () => {
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  return (
+    <div className="min-h-screen">
+      {/* 메인 배너 섹션 */}
+      <section className="bg-indigo-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <div className="text-center">
+            <h1 className="text-4xl sm:text-5xl font-bold mb-4">
+              Special Deals
+            </h1>
+            <p className="text-lg sm:text-xl mb-8">
+              최대 50% 할인된 가격으로 제품을 만나보세요
+            </p>
+            <button className="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-indigo-50 transition-colors">
+              할인 상품 보기
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* 카테고리 섹션 */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">카테고리</h2>
+          <CategoryList 
+            onCategorySelect={setSelectedCategory} 
+            selectedCategoryId={selectedCategory}
+          />
+        </section>
+
+        {/* 카테고리별 상품 섹션 (카테고리가 선택된 경우만 표시) */}
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">
+              {selectedCategory ? '카테고리 상품' : '전체 상품'}
+            </h2>
+          </div>
+          <ProductList 
+            categoryId={selectedCategory}
+            searchQuery={searchQuery}
+            limit={8}
+          />
+        </section>
+
+        {/* 추천 상품 섹션 */}
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">추천 상품</h2>
+            <button className="text-indigo-600 hover:text-indigo-800 flex items-center">
+              더보기
+              <ChevronRight className="w-5 h-5 ml-1" />
+            </button>
+          </div>
+          <ProductList 
+            categoryId={null}
+            searchQuery=""
+            limit={4}
+            featured={true}
+          />
+        </section>
+
+        {/* 신상품 섹션 */}
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">신상품</h2>
+            <button className="text-indigo-600 hover:text-indigo-800 flex items-center">
+              더보기
+              <ChevronRight className="w-5 h-5 ml-1" />
+            </button>
+          </div>
+          <ProductList 
+            categoryId={null}
+            searchQuery=""
+            limit={4}
+            sortBy="createdAt"
+          />
+        </section>
+      </main>
+    </div>
+  );
+};
+
+export default HomePage;
+
