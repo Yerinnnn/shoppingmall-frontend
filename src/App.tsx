@@ -7,8 +7,8 @@ import Layout from './common/components/layout/Layout';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
-// import ProductPage from './pages/product/ProductPage';
-// import ProductDetailPage from './pages/product/ProductDetailPage';
+import ProductPage from './pages/product/ProductPage';
+import ProductDetailPage from './pages/product/ProductDetailPage';
 // import CartPage from './pages/cart/CartPage';
 // import OrderListPage from './pages/order/OrderListPage';
 // import OrderDetailPage from './pages/order/OrderDetailPage';
@@ -27,8 +27,8 @@ const App: React.FC = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
-            {/* <Route path="/products" element={<ProductPage />} />
-            <Route path="/products/:id" element={<ProductDetailPage />} /> */}
+            <Route path="/products" element={<ProductPage />} />
+            <Route path="/products/:id" element={<ProductDetailPage />} />
             
             {/* 보호된 라우트 */}
             {/* 인증이 필요한 경로를 보호하는 컴포넌트 */}
