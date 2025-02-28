@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
-import CategoryList from '../components/product/CategoryList';
-import ProductList from '../components/product/ProductList';
+// import CategoryList from '../components/product/CategoryList';
+// import ProductList from '../components/product/ProductList';
 
 const HomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -30,10 +30,10 @@ const HomePage = () => {
         {/* 카테고리 섹션 */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6">카테고리</h2>
-          <CategoryList 
+          {/* <CategoryList 
             onCategorySelect={setSelectedCategory} 
             selectedCategoryId={selectedCategory}
-          />
+          /> */}
         </section>
 
         {/* 카테고리별 상품 섹션 (카테고리가 선택된 경우만 표시) */}
@@ -43,11 +43,11 @@ const HomePage = () => {
               {selectedCategory ? '카테고리 상품' : '전체 상품'}
             </h2>
           </div>
-          <ProductList 
+          {/* <ProductList 
             categoryId={selectedCategory}
             searchQuery={searchQuery}
             limit={8}
-          />
+          /> */}
         </section>
 
         {/* 추천 상품 섹션 */}
@@ -59,12 +59,12 @@ const HomePage = () => {
               <ChevronRight className="w-5 h-5 ml-1" />
             </button>
           </div>
-          <ProductList 
+          {/* <ProductList 
             categoryId={null}
             searchQuery=""
             limit={4}
             featured={true}
-          />
+          /> */}
         </section>
 
         {/* 신상품 섹션 */}
@@ -76,12 +76,12 @@ const HomePage = () => {
               <ChevronRight className="w-5 h-5 ml-1" />
             </button>
           </div>
-          <ProductList 
+          {/* <ProductList 
             categoryId={null}
             searchQuery=""
             limit={4}
             sortBy="createdAt"
-          />
+          /> */}
         </section>
       </main>
     </div>

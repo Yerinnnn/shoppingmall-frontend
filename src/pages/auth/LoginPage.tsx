@@ -1,10 +1,12 @@
 import React from 'react';
-import LoginForm from '../components/auth/LoginForm';
-import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
+import LoginForm from '../../features/auth/components/LoginForm';
+import { useAuth } from '../../features/auth/hooks/useAuth';
 
 const LoginPage: React.FC = () => {
   const { login } = useAuth();
-  const handleLoginSuccess = (token: string, username: string) => {
+  
+  const handleLoginSuccess = (token: string, username: string, name: string) => {
     login(token, username);
   };
 
@@ -17,9 +19,9 @@ const LoginPage: React.FC = () => {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}
-            <a href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link to="/signup" className="font-medium text-blue-600 hover:text-blue-500">
               create a new account
-            </a>
+            </Link>
           </p>
         </div>
         <LoginForm onSuccess={handleLoginSuccess} />

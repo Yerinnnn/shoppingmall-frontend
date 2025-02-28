@@ -1,5 +1,6 @@
 import React from 'react';
-import SignupForm from '../components/auth/SignupForm';
+import { Link } from 'react-router-dom';
+import SignupForm from '../../features/auth/components/SignupForm';
 
 const SignupPage: React.FC = () => {
   return (
@@ -11,9 +12,9 @@ const SignupPage: React.FC = () => {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}
-            <a href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
               sign in to your account
-            </a>
+            </Link>
           </p>
         </div>
         <SignupForm />
