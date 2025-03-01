@@ -6,7 +6,7 @@ import ProductListSkeleton from './skeletons/ProductListSkeleton';
 
 interface ProductListProps extends ProductListParams {}
 
-export const ProductList: React.FC<ProductListProps> = ({
+const ProductList: React.FC<ProductListProps> = ({
   categoryId,
   searchQuery = '',
   limit = 20,

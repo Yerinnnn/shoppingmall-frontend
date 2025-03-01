@@ -7,7 +7,7 @@ interface ProductDetailTabsProps {
   detail: ProductDetail;
 }
 
-export const ProductDetailTabs: React.FC<ProductDetailTabsProps> = ({ product, detail }) => {
+const ProductDetailTabs: React.FC<ProductDetailTabsProps> = ({ product, detail }) => {
   const [activeTab, setActiveTab] = useState(0);
 
   const tabs = [

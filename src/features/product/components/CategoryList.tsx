@@ -1,13 +1,13 @@
 import React from 'react';
 import { useCategories } from '../hooks/useCategories';
-import { CategorySkeleton } from './skeletons/CategorySkeleton';
+import CategorySkeleton from './skeletons/CategorySkeleton';
 
 interface CategoryListProps {
   onCategorySelect: (categoryId: number | null) => void;
   selectedCategoryId: number | null;
 }
 
-export const CategoryList: React.FC<CategoryListProps> = ({ 
+const CategoryList: React.FC<CategoryListProps> = ({ 
   onCategorySelect,
   selectedCategoryId
 }) => {

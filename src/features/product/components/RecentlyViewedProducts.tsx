@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '../types';
 
-export const RecentlyViewedProducts: React.FC = () => {
+const RecentlyViewedProducts: React.FC = () => {
   const [recentProducts, setRecentProducts] = useState<Product[]>([]);
 
   useEffect(() => {

@@ -6,7 +6,7 @@ import CartList from '../../features/cart/components/CartList';
 import CartSummary from '../../features/cart/components/CartSummary';
 import EmptyCart from '../../features/cart/components/EmptyCart';
 
-export const CartPage: React.FC = () => {
+const CartPage: React.FC = () => {
   const navigate = useNavigate();
   const { 
     cartItems, 

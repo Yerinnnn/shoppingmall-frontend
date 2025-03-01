@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const CartSkeleton: React.FC = () => {
+const CartSkeleton: React.FC = () => {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <div className="animate-pulse">

@@ -4,7 +4,7 @@ import CategoryList from '../../features/product/components/CategoryList';
 import ProductList from '../../features/product/components/ProductList';
 import { ProductFilterOptions } from '../../features/product/types';
 
-export const ProductPage: React.FC = () => {
+const ProductPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filterOptions, setFilterOptions] = useState<ProductFilterOptions>({
     categoryId: searchParams.get('category') ? Number(searchParams.get('category')) : null,

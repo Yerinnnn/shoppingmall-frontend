@@ -6,7 +6,7 @@ import RecentlyViewedProducts from '../../features/product/components/RecentlyVi
 import ProductList from '../../features/product/components/ProductList';
 import { useProduct } from '../../features/product/hooks/useProduct';
 
-export const ProductDetailPage: React.FC = () => {
+const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { product } = useProduct(id);
   

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const ProductListSkeleton: React.FC = () => {
+const ProductListSkeleton: React.FC = () => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {[1, 2, 3, 4].map((i) => (

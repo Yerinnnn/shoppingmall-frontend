@@ -8,7 +8,7 @@ interface CartSummaryProps {
   disabled?: boolean;
 }
 
-export const CartSummary: React.FC<CartSummaryProps> = ({ 
+const CartSummary: React.FC<CartSummaryProps> = ({ 
   items, 
   onClearCart,
   disabled = false

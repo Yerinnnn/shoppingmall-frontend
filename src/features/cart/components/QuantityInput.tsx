@@ -9,7 +9,7 @@ interface QuantityInputProps {
   disabled?: boolean;
 }
 
-export const QuantityInput: React.FC<QuantityInputProps> = ({
+const QuantityInput: React.FC<QuantityInputProps> = ({
   value,
   onChange,
   min = 1,

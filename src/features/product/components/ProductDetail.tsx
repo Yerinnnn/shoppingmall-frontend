@@ -8,7 +8,7 @@ import { useWishlist } from '../../wishlist/hooks/useWishlist';
 import ProductDetailSkeleton from './skeletons/ProductDetailSkeleton';
 import ProductDetailTabs from './ProductDetailTabs';
 
-export const ProductDetail: React.FC = () => {
+const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { product, detail, loading, error } = useProduct(id);
   const [quantity, setQuantity] = useState(1);

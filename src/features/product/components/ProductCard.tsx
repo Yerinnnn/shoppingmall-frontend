@@ -10,7 +10,7 @@ interface ProductCardProps extends Product {
   onWishlistToggle?: (productId: number, isLiked: boolean) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({
+const ProductCard: React.FC<ProductCardProps> = ({
   productId,
   name,
   price,

@@ -11,7 +11,7 @@ interface CartListProps {
   disabled?: boolean;
 }
 
-export const CartList: React.FC<CartListProps> = ({ 
+const CartList: React.FC<CartListProps> = ({ 
   items, 
   isLoading, 
   onUpdateQuantity,

@@ -11,7 +11,7 @@ interface CartItemProps {
   disabled?: boolean;
 }
 
-export const CartItem: React.FC<CartItemProps> = ({
+const CartItem: React.FC<CartItemProps> = ({
   item,
   onUpdateQuantity,
   onRemove,

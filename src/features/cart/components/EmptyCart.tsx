@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingBag } from 'lucide-react';
 
-export const EmptyCart: React.FC = () => {
+const EmptyCart: React.FC = () => {
   const navigate = useNavigate();
 
   return (
