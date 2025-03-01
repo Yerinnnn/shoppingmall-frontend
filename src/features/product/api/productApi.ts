@@ -1,8 +1,8 @@
 import { apiClient } from '../../../services/apiClient';
 import { Product, ProductDetail, Category, ProductListParams } from '../types';
 
-const PRODUCT_API_URL = '/api/products';
-const CATEGORY_API_URL = '/api/categories';
+const PRODUCT_API_URL = '/products';
+const CATEGORY_API_URL = '/categories';
 
 export const productApi = {
   // 상품 목록 조회

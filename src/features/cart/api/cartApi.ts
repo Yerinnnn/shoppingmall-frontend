@@ -5,7 +5,7 @@ import {
   UpdateCartItemRequest 
 } from '../types';
 
-const CART_ENDPOINT = '/api/cart';
+const CART_ENDPOINT = '/cart';
 
 export const cartApi = {
   // 장바구니 조회
