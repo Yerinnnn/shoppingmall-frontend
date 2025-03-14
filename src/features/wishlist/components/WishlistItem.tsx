@@ -48,7 +48,7 @@ const WishlistItem: React.FC<WishlistItemProps> = ({ item, onRemove }) => {
       <div className="p-4">
         <div className="flex items-center gap-4">
           <img
-            src={`/api/placeholder/100/100`}
+            src={`https://via.placeholder.com/100x100`}
             alt={item.productName}
             className="w-20 h-20 object-cover rounded"
           />

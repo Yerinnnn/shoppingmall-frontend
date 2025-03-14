@@ -1,9 +1,9 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { AuthProvider } from './features/auth/contexts/AuthContext';
-import Layout from './common/components/layout/Layout';
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { AuthProvider } from "./features/auth/contexts/AuthContext";
+import Layout from "./common/components/layout/Layout";
 
 // 페이지 임포트
 import HomePage from "./pages/HomePage";
@@ -13,8 +13,12 @@ import ProductPage from "./pages/product/ProductPage";
 import ProductDetailPage from "./pages/product/ProductDetailPage";
 import CartPage from "./pages/cart/CartPage";
 import WishlistPage from "./pages/wishlist/WishlistPage";
-// import OrderListPage from './pages/order/OrderListPage';
-// import OrderDetailPage from './pages/order/OrderDetailPage';
+import OrderCreatePage from "./pages/order/OrderCreatePage";
+import OrderListPage from "./pages/order/OrderListPage";
+import OrderDetailPage from "./pages/order/OrderDetailPage";
+import OrderCompletePage from "./pages/order/OrderCompletePage";
+import PaymentSuccessPage from './pages/payment/PaymentSuccessPage';
+import PaymentFailPage from './pages/payment/PaymentFailPage';
 
 // 보호된 라우트 컴포넌트
 import ProtectedRoute from "./features/auth/components/ProtectedRoute";
@@ -49,8 +53,16 @@ const App: React.FC = () => {
               <Route element={<ProtectedRoute />}>
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/wishlist" element={<WishlistPage />} />
-                {/* <Route path="/orders" element={<OrderListPage />} />
-              <Route path="/orders/:orderId" element={<OrderDetailPage />} /> */}
+
+                {/* 결제 관련 라우트 */}
+                <Route path="/payments/success" element={<PaymentSuccessPage />} />
+                <Route path="/payments/fail" element={<PaymentFailPage />} />
+
+                {/* 주문 관련 라우트 - 구체적인 경로를 먼저 처리 */}
+                <Route path="/orders/new" element={<OrderCreatePage />} />
+                <Route path="/orders/complete" element={<OrderCompletePage />} />
+                <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+                <Route path="/orders" element={<OrderListPage />} />
               </Route>
             </Routes>
           </Layout>

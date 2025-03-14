@@ -31,7 +31,7 @@ const CartItem: React.FC<CartItemProps> = ({
         {/* 상품 정보 */}
         <div className="col-span-2 flex items-center">
           <img
-            src={`/api/placeholder/100/100`}
+            src={`https://via.placeholder.com/100x100`}
             alt={item.productName}
             className="w-20 h-20 object-cover rounded"
             loading="lazy"
