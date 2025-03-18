@@ -13,6 +13,11 @@ export interface ApiErrorResponse {
   errors?: Record<string, string[]>;
 }
 
+export interface PaymentPrepareResponse {
+  clientKey: string;
+  orderId: string;
+}
+
 // 기본 설정
 const defaultConfig: ApiClientConfig = {
   baseURL: '/api',

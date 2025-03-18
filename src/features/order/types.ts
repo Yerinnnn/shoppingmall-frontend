@@ -8,6 +8,7 @@ export type OrderStatus =
   | 'CANCELLED';   // 주문 취소
 
 export interface OrderItem {
+  orderItemId?: number;
   productId: number;
   productName: string;
   quantity: number;

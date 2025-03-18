@@ -6,7 +6,6 @@ import { CartItem } from '../../features/cart/types';
 import OrderForm from '../../features/order/components/OrderForm';
 import OrderItems from '../../features/order/components/OrderItems';
 import OrderPaymentSummary from '../../features/order/components/OrderPaymentSummary';
-import { useOrder } from '../../features/order/hooks/useOrder';
 import { OrderItem } from '../../features/order/types';
 
 interface LocationState {
@@ -22,8 +21,6 @@ interface LocationState {
 const OrderCreatePage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { useCreateOrder } = useOrder();
-  const createOrderMutation = useCreateOrder();
 
   // 장바구니 데이터 및 요약 정보
   const { cartItems = [], summary: initialSummary } = 
@@ -66,6 +63,9 @@ const OrderCreatePage: React.FC = () => {
       toast.error('잘못된 접근입니다.');
       navigate('/cart');
     }
+    
+    // 카트 아이템을 localStorage에 저장 (결제 처리를 위해)
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems, navigate]);
 
   // 결제수단 선택 처리
@@ -89,61 +89,31 @@ const OrderCreatePage: React.FC = () => {
     setSelectedAddressId(addressId);
   };
 
-  // 결제 성공 처리
+  // 결제 성공 처리 (주문 생성은 결제 과정 중 먼저 수행하므로 이 함수는 간소화)
   const handlePaymentSuccess = async (paymentKey: string) => {
-    try {
-      // 결제 성공 후 주문 생성
-      await createOrderMutation.mutateAsync({
-        deliveryAddressId: selectedAddressId!,
-        paymentMethodId: selectedMethodId || -1,
-        usePoints: pointsUsed,
-        items: cartItems.map(item => ({
-          productId: item.productId,
-          quantity: item.quantity
-        }))
-      });
-
-      // 결제 완료 처리
-      const paymentCompleteResponse = await fetch('/api/payments/complete', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        },
-        body: JSON.stringify({
-          paymentKey,
-          orderId,
-          amount: summary.total
-        })
-      });
-
-      if (!paymentCompleteResponse.ok) {
-        throw new Error('결제 완료 처리에 실패했습니다.');
-      }
-
-      toast.success('결제가 완료되었습니다.');
-      navigate('/payments/success', { 
-        state: { 
-          orderId, 
-          paymentKey,
-          amount: summary.total
-        } 
-      });
-    } catch (error) {
-      console.error('Order creation failed:', error);
-      toast.error(error instanceof Error ? error.message : '주문 처리 중 오류가 발생했습니다.');
-      navigate('/payments/fail', {
-        state: {
-          orderId,
-          message: error instanceof Error ? error.message : '주문 처리 중 오류가 발생했습니다.'
-        }
-      });
-    }
+    // 결제 성공 시 추가 처리 (로깅 등) 가능
+    toast.success('결제가 완료되었습니다.');
+    
+    // 이제 PaymentSuccessPage에서 결제 확인이 이루어지므로 
+    // 여기서는 정보만 전달하고 나머지 처리는 해당 페이지에서 수행
+    navigate('/payments/success', { 
+      state: { 
+        orderId, 
+        paymentKey,
+        amount: summary.total
+      } 
+    });
   };
 
   // 결제 실패 처리
   const handlePaymentFail = (error: string) => {
     toast.error(error || '결제 처리 중 오류가 발생했습니다.');
+    navigate('/payments/fail', {
+      state: {
+        orderId,
+        message: error || '결제 처리 중 오류가 발생했습니다.'
+      }
+    });
   };
 
   // 주문 항목 렌더링
