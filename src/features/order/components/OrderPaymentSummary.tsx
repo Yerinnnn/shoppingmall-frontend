@@ -6,6 +6,8 @@ import {
   PaymentResponse,
 } from "../../../types/payment";
 import api from "../../../services/apiClient";
+import { useOrder } from "../hooks/useOrder";
+import { CartItem } from "../../cart/types"
 
 // 응답 타입 정의
 interface PreparePaymentResponse {
@@ -36,18 +38,20 @@ const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
   onPaymentFail,
 }) => {
   const [processing, setProcessing] = useState(false);
+  const { useCreateOrder } = useOrder();
+  const createOrderMutation = useCreateOrder();
 
   // 결제 처리 함수들
   const paymentHandlers = {
     // 카드결제
-    [PaymentType.CARD]: async () => {
+    [PaymentType.CARD]: async (createdOrderId: string) => {
       try {
-        console.log("Preparing payment for order:", orderId);
+        console.log("Preparing payment for order:", createdOrderId);
         // 결제 준비 API 호출 - 타입 지정
         const prepareResponse = await api.post<PreparePaymentResponse>(
           `/payments/prepare`,
           {
-            orderId,
+            orderId: createdOrderId,
             amount: summary.total,
             paymentMethodId: selectedMethodId === -1 ? null : selectedMethodId,
           }
@@ -55,10 +59,11 @@ const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
 
         // 타입 안전한 속성 접근
         const clientKey = prepareResponse.clientKey;
-        console.log("Payment preparation successful, client key received");
+        console.log("Payment preparation successful, client key received:", clientKey);
 
         // 토스페이먼츠 SDK 초기화
         const tossPayments = await loadTossPayments(clientKey);
+        console.log("Toss Payments SDK loaded successfully");
 
         // 브라우저 주소
         const currentOrigin = window.location.origin;
@@ -66,7 +71,7 @@ const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
         // 결제 요청 - 리다이렉트 방식으로 설정
         await tossPayments.requestPayment("카드", {
           amount: summary.total,
-          orderId: orderId,
+          orderId: createdOrderId,
           orderName: orderName,
           // 백엔드 엔드포인트가 아닌 프론트엔드 경로로 리다이렉트
           successUrl: `${currentOrigin}/payments/success`,
@@ -86,12 +91,12 @@ const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
     },
 
     // 가상계좌 결제
-    [PaymentType.VIRTUAL]: async () => {
+    [PaymentType.VIRTUAL]: async (createdOrderId: string) => {
       try {
         const result = await api.post<PaymentResult>(
           "/payments/virtual-account",
           {
-            orderId,
+            orderId: createdOrderId,
             amount: summary.total,
           }
         );
@@ -107,10 +112,10 @@ const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
     },
 
     // 일반 결제
-    [PaymentType.NORMAL]: async () => {
+    [PaymentType.NORMAL]: async (createdOrderId: string) => {
       try {
         const result = await api.post<PaymentResult>("/payments/normal", {
-          orderId,
+          orderId: createdOrderId,
           amount: summary.total,
         });
         onPaymentSuccess(result.paymentKey);
@@ -125,7 +130,7 @@ const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
     },
   };
 
-  // 결제 실행 (추가된 함수)
+  // 결제 실행
   const handlePayment = async () => {
     if (!selectedPaymentType) {
       onPaymentFail('결제 방식을 선택해주세요.');
@@ -135,13 +140,35 @@ const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
     setProcessing(true);
 
     try {
-      console.log(`Starting ${selectedPaymentType} payment`);
+      console.log(`Starting ${selectedPaymentType} payment process`);
+      
+      // 1. 먼저 주문 생성 (PENDING 상태)
+      const createdOrder = await createOrderMutation.mutateAsync({
+        deliveryAddressId: selectedMethodId || 0,
+        paymentMethodId: selectedMethodId || -1,
+        usePoints: summary.pointsUsed,
+        items: JSON.parse(localStorage.getItem('cartItems') || '[]').map((item: CartItem) => ({
+          productId: item.productId,
+          quantity: item.quantity
+        }))
+      });
+      
+      console.log("Order created successfully:", createdOrder);
+      
+      // 2. 생성된 주문 ID로 결제 처리
+      const createdOrderId = createdOrder.orderId?.toString() || orderId;
+      console.log("Using orderID for payment:", createdOrderId);
+      
+      // 3. 결제 방식에 따른 핸들러 실행
       const handler = paymentHandlers[selectedPaymentType];
       if (!handler) {
         throw new Error('지원하지 않는 결제 방식입니다.');
       }
-      await handler();
+      
+      await handler(createdOrderId);
+      
     } catch (error) {
+      console.error("Payment process failed:", error);
       onPaymentFail(error instanceof Error ? error.message : '결제 처리 중 오류가 발생했습니다.');
     } finally {
       setProcessing(false);

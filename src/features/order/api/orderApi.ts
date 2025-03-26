@@ -8,21 +8,21 @@ export const orderKeys = {
 };
 
 export const fetchOrders = async (): Promise<Order[]> => {
-  return apiClient.get('/api/orders');
+  return apiClient.get('/orders');
 };
 
 export const fetchOrderDetail = async (orderId: number): Promise<Order> => {
-  return apiClient.get(`/api/orders/${orderId}`);
+  return apiClient.get(`/orders/${orderId}`);
 };
 
 export const createOrder = async (orderData: CreateOrderRequest): Promise<Order> => {
-  return apiClient.post('/api/orders', orderData);
+  return apiClient.post('/orders', orderData);
 };
 
 export const cancelOrder = async (orderId: number): Promise<Order> => {
-  return apiClient.post(`/api/orders/${orderId}/cancel`);
+  return apiClient.post(`/orders/${orderId}/cancel`);
 };
 
 export const confirmOrder = async (orderId: number): Promise<Order> => {
-  return apiClient.post(`/api/orders/${orderId}/confirm`);
+  return apiClient.post(`/orders/${orderId}/confirm`);
 };
