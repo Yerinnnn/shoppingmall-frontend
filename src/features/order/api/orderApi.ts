@@ -16,7 +16,8 @@ export const fetchOrderDetail = async (orderId: number): Promise<Order> => {
 };
 
 export const createOrder = async (orderData: CreateOrderRequest): Promise<Order> => {
-  return apiClient.post('/orders', orderData);
+  const response = await apiClient.post('/orders', orderData);
+  return response.data; 
 };
 
 export const cancelOrder = async (orderId: number): Promise<Order> => {

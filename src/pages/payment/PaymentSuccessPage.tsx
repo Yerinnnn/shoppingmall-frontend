@@ -32,7 +32,10 @@ const PaymentSuccessPage = () => {
 
   useEffect(() => {
     const confirmPayment = async () => {
-      if (!paymentKey || !orderId || !amount) {
+      // localStorage에서 실제 주문 ID 가져오기
+      const actualOrderId = orderId || localStorage.getItem('lastOrderId');
+      
+      if (!paymentKey || !actualOrderId || !amount) {
         setError('결제 정보가 올바르지 않습니다.');
         setLoading(false);
         return;
@@ -40,12 +43,12 @@ const PaymentSuccessPage = () => {
 
       try {
         // 결제 확인 API 호출
-        console.log('결제 확인 요청 파라미터:', { paymentKey, orderId, amount });
+        console.log('결제 확인 요청 파라미터:', { paymentKey, orderId: actualOrderId, amount });
 
         // 결제 확인 API 호출 (결제 성공 후 주문 상태 PENDING -> PAID 업데이트)
         const response = await api.post<PaymentConfirmResponse>('/payments/confirm', {
           paymentKey,
-          orderId,
+          orderId: actualOrderId,
           amount: Number(amount)
         });
 
@@ -100,8 +103,11 @@ const PaymentSuccessPage = () => {
   }, [paymentKey, orderId, amount]);
 
   const handleGoToOrderDetail = () => {
-    if (orderId) {
-      navigate(`/orders/${orderId}`);
+    // localStorage에서도 주문 ID 확인
+    const actualOrderId = orderId || localStorage.getItem('lastOrderId');
+    
+    if (actualOrderId) {
+      navigate(`/orders/${actualOrderId}`);
     } else {
       toast.error('주문 정보를 찾을 수 없습니다.');
     }
@@ -178,7 +184,7 @@ const PaymentSuccessPage = () => {
           <dl className="divide-y">
             <div className="py-3 flex justify-between">
               <dt className="text-gray-600">주문번호</dt>
-              <dd className="font-medium">{orderId}</dd>
+              <dd className="font-medium">{localStorage.getItem('lastOrderNumber') || '주문번호 없음'}</dd>
             </div>
             <div className="py-3 flex justify-between">
               <dt className="text-gray-600">결제금액</dt>

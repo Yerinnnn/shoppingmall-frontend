@@ -19,21 +19,21 @@ interface PaymentResult {
 }
 
 interface OrderPaymentSummaryProps {
-  orderId: string;
   orderName: string;
   summary: PaymentSummary;
   selectedPaymentType: PaymentType | null;
   selectedMethodId: number | null;
+  selectedAddressId: number | null;
   onPaymentSuccess: (paymentKey: string) => void;
   onPaymentFail: (error: string) => void;
 }
 
 const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
-  orderId,
   orderName,
   summary,
   selectedPaymentType,
   selectedMethodId,
+  selectedAddressId,
   onPaymentSuccess,
   onPaymentFail,
 }) => {
@@ -44,14 +44,14 @@ const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
   // 결제 처리 함수들
   const paymentHandlers = {
     // 카드결제
-    [PaymentType.CARD]: async (createdOrderId: string) => {
+    [PaymentType.CARD]: async (orderNumber: string) => {
       try {
-        console.log("Preparing payment for order:", createdOrderId);
+        console.log("Preparing payment for order:", orderNumber);
         // 결제 준비 API 호출 - 타입 지정
         const prepareResponse = await api.post<PreparePaymentResponse>(
           `/payments/prepare`,
           {
-            orderId: createdOrderId,
+            orderId: orderNumber,
             amount: summary.total,
             paymentMethodId: selectedMethodId === -1 ? null : selectedMethodId,
           }
@@ -71,7 +71,7 @@ const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
         // 결제 요청 - 리다이렉트 방식으로 설정
         await tossPayments.requestPayment("카드", {
           amount: summary.total,
-          orderId: createdOrderId,
+          orderId: orderNumber,
           orderName: orderName,
           // 백엔드 엔드포인트가 아닌 프론트엔드 경로로 리다이렉트
           successUrl: `${currentOrigin}/payments/success`,
@@ -91,12 +91,12 @@ const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
     },
 
     // 가상계좌 결제
-    [PaymentType.VIRTUAL]: async (createdOrderId: string) => {
+    [PaymentType.VIRTUAL]: async (orderNumber: string) => {
       try {
         const result = await api.post<PaymentResult>(
           "/payments/virtual-account",
           {
-            orderId: createdOrderId,
+            orderNumber,
             amount: summary.total,
           }
         );
@@ -112,10 +112,10 @@ const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
     },
 
     // 일반 결제
-    [PaymentType.NORMAL]: async (createdOrderId: string) => {
+    [PaymentType.NORMAL]: async (orderNumber: string) => {
       try {
         const result = await api.post<PaymentResult>("/payments/normal", {
-          orderId: createdOrderId,
+          orderNumber,
           amount: summary.total,
         });
         onPaymentSuccess(result.paymentKey);
@@ -143,21 +143,31 @@ const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
       console.log(`Starting ${selectedPaymentType} payment process`);
       
       // 1. 먼저 주문 생성 (PENDING 상태)
-      const createdOrder = await createOrderMutation.mutateAsync({
-        deliveryAddressId: selectedMethodId || 0,
+      const orderData = {
+        deliveryAddressId: selectedAddressId || 0,
         paymentMethodId: selectedMethodId || -1,
         usePoints: summary.pointsUsed,
         items: JSON.parse(localStorage.getItem('cartItems') || '[]').map((item: CartItem) => ({
           productId: item.productId,
           quantity: item.quantity
         }))
-      });
+      };
+
+      const response = await createOrderMutation.mutateAsync(orderData);
+      console.log("전체 주문 응답:", JSON.stringify(response, null, 2));
+
+      console.log("주문 번호:", response.orderNumber);
       
-      console.log("Order created successfully:", createdOrder);
-      
+      // 백엔드에서 생성된 주문 번호 확인
+      if (!response || !response.orderNumber) {
+        throw new Error('주문 번호를 받아오지 못했습니다.');
+      }
+
       // 2. 생성된 주문 ID로 결제 처리
-      const createdOrderId = createdOrder.orderId?.toString() || orderId;
-      console.log("Using orderID for payment:", createdOrderId);
+      const orderNumber = response.orderNumber;
+      localStorage.setItem('lastOrderId', orderNumber); // 기존 키 유지 (호환성)
+
+      console.log("Using order number for payment:", orderNumber);
       
       // 3. 결제 방식에 따른 핸들러 실행
       const handler = paymentHandlers[selectedPaymentType];
@@ -165,7 +175,7 @@ const OrderPaymentSummary: React.FC<OrderPaymentSummaryProps> = ({
         throw new Error('지원하지 않는 결제 방식입니다.');
       }
       
-      await handler(createdOrderId);
+      await handler(orderNumber);
       
     } catch (error) {
       console.error("Payment process failed:", error);
