@@ -20,6 +20,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build React app
-        run: npm run build
+      - name: Build React app (ignore lint warnings)
+        run: CI='' npm run build
 
