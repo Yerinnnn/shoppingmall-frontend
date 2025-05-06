@@ -1,165 +1,77 @@
-export interface AdminState {
-    isAdmin: boolean;
-    loading: boolean;
-    error: string | null;
-  }
-  
-  export interface Category {
-    id: number;
-    name: string;
-    description?: string;
-    parentId?: number;
-    imageUrl?: string;
-    status: 'ACTIVE' | 'INACTIVE';
-    createdAt: string;
-    updatedAt: string;
-  }
-  
-  export interface Discount {
-    id: number;
-    name: string;
-    description?: string;
-    discountType: 'PERCENTAGE' | 'FIXED_AMOUNT';
-    discountValue: number;
-    startDate: string;
-    endDate: string;
-    status: 'ACTIVE' | 'SCHEDULED' | 'EXPIRED' | 'CANCELLED';
-    minPurchaseAmount?: number;
-    maxDiscountAmount?: number;
-    applicableProducts?: number[]; // Product IDs
-    applicableCategories?: number[]; // Category IDs
-    createdAt: string;
-    updatedAt: string;
-  }
-  
-  export interface ProductInventory {
-    id: number;
-    productId: number;
-    quantity: number;
-    lowStockThreshold?: number;
-    sku: string;
-    location?: string;
-    updatedAt: string;
-  }
-  
-  export interface AdminProduct {
-    id: number;
-    name: string;
-    description: string;
-    price: number;
-    salePrice?: number;
-    cost: number;
-    imageUrl?: string;
-    category: string;
-    categoryId: number;
-    status: 'ACTIVE' | 'INACTIVE' | 'DRAFT' | 'OUT_OF_STOCK';
-    featured?: boolean;
-    discounted?: boolean;
-    supplier?: string;
-    inventoryDetails: ProductInventory;
-    discounts?: Discount[];
-    createdAt: string;
-    updatedAt: string;
-  }
-  
-  export interface Member {
-    id: number;
-    username: string;
-    name: string;
-    email: string;
-    contact: string;
-    roles: string[];
-    status: 'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED';
-    joinDate: string;
-    lastLoginDate?: string;
-    totalSpent?: number;
-    totalOrders?: number;
-    membershipTier?: string;
-    points?: number;
-  }
-  
-  export interface OrderItem {
-    id: number;
-    productId: number;
-    productName: string;
-    quantity: number;
-    price: number;
-    discount?: number;
-    status?: 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'RETURNED';
-  }
-  
-  export interface Order {
-    id: number;
-    orderNumber: string;
-    memberId: number;
-    memberName: string;
-    orderDate: string;
-    status: 'PENDING' | 'PAID' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'REFUNDED';
-    totalAmount: number;
-    paymentMethod: string;
-    shippingAddress: string;
-    trackingNumber?: string;
-    items: OrderItem[];
-  }
-  
-  export interface Review {
-    id: number;
-    productId: number;
-    productName: string;
-    memberId: number;
-    memberName: string;
-    rating: number;
-    title: string;
-    content: string;
-    status: 'PENDING' | 'APPROVED' | 'REJECTED';
-    createdAt: string;
-    updatedAt?: string;
-    images?: string[];
-  }
-  
-  export interface Inquiry {
-    id: number;
-    productId?: number;
-    productName?: string;
-    memberId: number;
-    memberName: string;
-    subject: string;
-    content: string;
-    status: 'PENDING' | 'ANSWERED' | 'CLOSED';
-    answer?: string;
-    answerDate?: string;
-    createdAt: string;
-    isPrivate: boolean;
-  }
-  
-  export interface SalesStats {
-    period: string;
-    totalSales: number;
-    totalOrders: number;
-    averageOrderValue: number;
-    totalCustomers: number;
-    newCustomers: number;
-  }
-  
-  export interface ProductStats {
-    productId: number;
-    productName: string;
-    totalSold: number;
-    revenue: number;
-    profit: number;
-    returnRate: number;
-  }
-  
-  export interface AdminSettings {
-    siteName: string;
-    logoUrl: string;
-    contactEmail: string;
-    phoneNumber: string;
-    address: string;
-    socialLinks: Record<string, string>;
-    paymentMethods: string[];
-    shippingMethods: Record<string, number>;
-    returnPolicy: string;
-    privacyPolicy: string;
-    termsOfService: string;
-  }
+import { OrderStatus } from './order';
+import { ShippingStatus } from './shipping';
+import { Product, ProductDetail } from './product';
+
+// 대시보드 요약 정보 타입
+export interface DashboardSummary {
+  totalSales: number;
+  totalOrders: number;
+  newCustomers: number;
+  pendingOrders: number;
+  productsOutOfStock: number;
+}
+
+// 대시보드의 최근 주문 타입
+export interface RecentOrder {
+  orderId: number;
+  orderNumber: string;
+  customerName: string;
+  totalAmount: number;
+  status: OrderStatus;
+  createdAt: string;
+}
+
+// 재고 부족 상품 타입
+export interface LowStockProduct {
+  productId: number;
+  name: string;
+  stockQuantity: number;
+  threshold: number;
+  price: number;
+  categoryName: string;
+}
+
+// 관리자 권한 확인 응답 타입
+export interface AdminAuthResponse {
+  isAdmin: boolean;
+  permissions?: string[];
+}
+
+// 판매 데이터 포인트 타입
+export interface SalesDataPoint {
+  date: string;
+  sales: number;
+  orders: number;
+}
+
+// 상품 판매 통계 타입
+export interface ProductStat {
+  productId: number;
+  name: string;
+  salesCount: number;
+  salesAmount: number;
+  categoryName: string;
+}
+
+export interface AdminProduct extends Product {
+  categoryId: number;
+  manufacturer?: string;
+  origin?: string;
+  material?: string;
+  size?: string;
+  weight?: string;
+}
+
+export interface AdminProductDetail extends ProductDetail {
+  productDetailId: number;
+  content: string;
+  imageUrls: string[];
+  manufacturer: string;
+  origin: string;
+  material: string;
+  size: string;
+  weight: string;
+  viewCount: number;
+  updatedAt: string;
+  createdAt: string;
+}
